@@ -271,14 +271,26 @@
     height: 2.4rem;
     flex-shrink: 0;
     padding: 0;
-    border: 1.5px solid var(--border);
+    border: none;
     border-radius: 0.6rem;
-    background: var(--surface);
-    color: var(--ink);
+    background: #1f2937;
     cursor: pointer;
 
-    svg { display: block; color: inherit; }
-    &:active { background: var(--bg-alt); }
+    &:active { background: #374151; }
+  }
+}
+
+.mobile-menu-btn__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 3.5px;
+
+  span {
+    display: block;
+    width: 16px;
+    height: 2px;
+    border-radius: 1px;
+    background: #fff;
   }
 }
 
