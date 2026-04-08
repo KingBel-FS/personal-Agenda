@@ -179,6 +179,7 @@ public class ProfileService {
             DayProfileEntity entity = existing.get(category);
             entity.setWakeUpTime(LocalTime.parse(request.getWakeUpTime()));
         }
+        dayProfileRepository.saveAll(existing.values());
     }
 
     private boolean hasWakeUpScheduleChanged(List<DayProfileEntity> existingProfiles, List<DayProfileRequest> requests) {

@@ -59,6 +59,7 @@ public class OccurrenceRefreshService {
         List<TaskOccurrenceEntity> stale = taskOccurrenceRepository
                 .findAllByTaskRuleIdAndOccurrenceDateGreaterThanEqual(rule.getId(), effectiveFrom);
         taskOccurrenceRepository.deleteAll(stale);
+        taskOccurrenceRepository.flush();
 
         Map<DayCategory, LocalTime> wakeUpTimes = dayProfileRepository.findAllByUserId(userId).stream()
                 .collect(Collectors.toMap(DayProfileEntity::getDayCategory, DayProfileEntity::getWakeUpTime));

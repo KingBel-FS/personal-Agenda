@@ -76,10 +76,10 @@
 .nav-arrow {
   width: 40px;
   height: 40px;
-  border: 1px solid var(--border);
+  border: none;
   border-radius: 0.6rem;
-  background: var(--surface);
-  color: var(--ink);
+  background: #1f2937;
+  color: #fff;
   font-size: 1.25rem;
   font-weight: 700;
   cursor: pointer;
@@ -87,12 +87,13 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s;
+
+  svg { color: #fff; }
 
   &:hover {
-    background: var(--brand-50);
-    border-color: var(--brand);
-    color: var(--brand);
+    background: #374151;
+    color: #fff;
   }
 
   &:focus-visible {
