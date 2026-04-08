@@ -190,7 +190,7 @@
   }
 
   @media (max-width: 1023px) {
-    padding-top: 5.4rem;
+    padding-top: 3.8rem;
   }
 }
 
@@ -198,30 +198,46 @@
   display: none;
 
   @media (max-width: 1023px) {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 0.75rem;
+    display: flex;
     align-items: center;
+    gap: 0.75rem;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 220;
-    padding: 0.7rem 0.9rem;
-    background: color-mix(in srgb, var(--bg) 82%, white 18%);
+    height: 3.2rem;
+    padding: 0 0.9rem;
+    background: var(--bg);
     backdrop-filter: blur(18px);
     border-bottom: 1px solid var(--border);
   }
 }
 
-.mobile-streak {
-  padding: 0.45rem 0.65rem;
-  border-radius: 0.75rem;
-  background: var(--surface);
+.mobile-topbar__title {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.mobile-topbar__streak {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: var(--bg-alt);
+  color: var(--ink-3);
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-xs);
-  min-width: 0;
-  overflow: hidden;
+
+  &--active {
+    background: #fef3c7;
+    color: #b45309;
+    border-color: #fcd34d;
+  }
 }
 
 .mobile-menu-btn {
@@ -230,19 +246,18 @@
   @media (max-width: 1023px) {
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
     justify-content: center;
-    min-width: 5.1rem;
-    height: 100%;
-    padding: 0.85rem 0.9rem;
-    border: 1px solid var(--border);
-    border-radius: 1rem;
-    background: var(--surface);
+    width: 2.2rem;
+    height: 2.2rem;
+    flex-shrink: 0;
+    padding: 0;
+    border: none;
+    border-radius: 0.5rem;
+    background: transparent;
     color: var(--ink);
-    font: inherit;
-    font-weight: 700;
     cursor: pointer;
-    box-shadow: var(--shadow-xs);
+
+    &:active { background: var(--bg-alt); }
   }
 }
 
@@ -438,15 +453,11 @@
 
 @media (max-width: 640px) {
   .mobile-topbar {
-    padding: 0.65rem 0.75rem;
-  }
-
-  .mobile-streak {
-    padding: 0.6rem 0.65rem;
+    padding: 0 0.65rem;
   }
 
   .mobile-menu-btn {
-    min-width: 4.4rem;
+    min-width: auto;
     padding-inline: 0.8rem;
 
     span {

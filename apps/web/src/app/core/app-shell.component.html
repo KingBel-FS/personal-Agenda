@@ -212,23 +212,18 @@
       [attr.aria-expanded]="mobileNavOpen()"
       aria-label="Ouvrir le menu"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <line x1="3" y1="6" x2="21" y2="6"/>
         <line x1="3" y1="12" x2="21" y2="12"/>
         <line x1="3" y1="18" x2="21" y2="18"/>
       </svg>
-      <span>Menu</span>
     </button>
 
-    <section class="mobile-streak" aria-label="Streak actuelle">
-      <app-streak-flame
-        [current]="streak()?.currentStreak ?? 0"
-        [best]="streak()?.longestStreak ?? 0"
-        [active]="streak()?.streakActive ?? false"
-        label="Série"
-        variant="mobile"
-      />
-    </section>
+    <span class="mobile-topbar__title">Habit Tracker</span>
+
+    <span class="mobile-topbar__streak" [class.mobile-topbar__streak--active]="streak()?.streakActive">
+      {{ streak()?.currentStreak ?? 0 }}j
+    </span>
   </section>
 
   <router-outlet />

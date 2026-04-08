@@ -589,6 +589,10 @@ export class TaskManagePageComponent {
         selectedDate: date
       });
     }
+    // Ensure all occurrences for the day are loaded when auto-opening
+    if (this.autoOpenOccurrenceId) {
+      this.pageSize.set(100);
+    }
   }
 
   private tryAutoOpenOccurrence(): void {
