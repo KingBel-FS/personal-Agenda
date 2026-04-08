@@ -127,7 +127,7 @@ public class OccurrenceStatusService {
         }
 
         TodayResponse response = todayService.getForDate(email, occurrenceDate);
-        realtimeSyncService.publish(email, "TODAY");
+        try { realtimeSyncService.publish(email, "TODAY"); } catch (Exception ignored) {}
         return response;
     }
 
@@ -172,7 +172,7 @@ public class OccurrenceStatusService {
         overrideRepository.save(override);
 
         TodayResponse response = todayService.getForDate(email, occurrenceDate);
-        realtimeSyncService.publish(email, "TODAY");
+        try { realtimeSyncService.publish(email, "TODAY"); } catch (Exception ignored) {}
         return response;
     }
 
@@ -219,7 +219,7 @@ public class OccurrenceStatusService {
         overrideRepository.save(override);
 
         TodayResponse response = todayService.getForDate(email, occurrenceDate);
-        realtimeSyncService.publish(email, "TODAY");
+        try { realtimeSyncService.publish(email, "TODAY"); } catch (Exception ignored) {}
         return response;
     }
 
@@ -252,7 +252,7 @@ public class OccurrenceStatusService {
         eventRepository.save(event);
 
         TodayResponse response = todayService.getForDate(email, occurrence.getOccurrenceDate());
-        realtimeSyncService.publish(email, "TODAY");
+        try { realtimeSyncService.publish(email, "TODAY"); } catch (Exception ignored) {}
         return response;
     }
 
@@ -297,7 +297,7 @@ public class OccurrenceStatusService {
         notificationJobService.cancelPendingJobsForOccurrence(occurrenceId);
 
         TodayResponse response = todayService.getForDate(email, newDate);
-        realtimeSyncService.publish(email, "TODAY");
+        try { realtimeSyncService.publish(email, "TODAY"); } catch (Exception ignored) {}
         return response;
     }
 }

@@ -30,9 +30,9 @@ public class RealtimeSyncService {
             emitter.send(SseEmitter.event()
                     .name("connected")
                     .data(new SyncEventResponse("CONNECTED", Instant.now().toString())));
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             removeEmitter(key, emitter);
-            emitter.completeWithError(exception);
+            try { emitter.completeWithError(exception); } catch (Exception ignored) {}
         }
 
         return emitter;
@@ -49,9 +49,9 @@ public class RealtimeSyncService {
         for (SseEmitter emitter : emitters) {
             try {
                 emitter.send(SseEmitter.event().name("sync").data(payload));
-            } catch (IOException exception) {
+            } catch (Exception exception) {
                 removeEmitter(key, emitter);
-                emitter.completeWithError(exception);
+                try { emitter.completeWithError(exception); } catch (Exception ignored) {}
             }
         }
     }

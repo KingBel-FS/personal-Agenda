@@ -78,7 +78,7 @@ public class WakeUpOverrideService {
         wakeUpOverrideRepository.save(entity);
 
         recalculateOccurrences(user.getId(), date, wakeUpTime);
-        realtimeSyncService.publish(email, "TODAY");
+        try { realtimeSyncService.publish(email, "TODAY"); } catch (Exception ignored) {}
 
         return new WakeUpOverrideResponse(date.toString(), wakeUpTime.toString());
     }
@@ -109,7 +109,7 @@ public class WakeUpOverrideService {
             toSave.add(occ);
         }
         taskOccurrenceRepository.saveAll(toSave);
-        realtimeSyncService.publish(email, "TODAY");
+        try { realtimeSyncService.publish(email, "TODAY"); } catch (Exception ignored) {}
     }
 
     private void recalculateOccurrences(UUID userId, LocalDate date, LocalTime wakeUpTime) {

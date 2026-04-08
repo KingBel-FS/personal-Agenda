@@ -1090,7 +1090,7 @@ public class TaskService {
     }
 
     private void publishSync(String email, String scope) {
-        realtimeSyncService.publish(email, scope);
+        try { realtimeSyncService.publish(email, scope); } catch (Exception ignored) {}
     }
 
     private TaskResponse toResponse(TaskDefinitionEntity definition, TaskRuleEntity rule, String photoUrl) {
