@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: 019-fix-occurrence-unique-by-time
+      author: gino
+      comment: "Story 2.5 — EVERY_N_MINUTES génère N occurrences/jour avec le même slot_id mais des heures différentes. Unicité sur (rule_id, date, time) à la place de (rule_id, date, slot_id)."
+      changes:
+        - sql:
+            sql: >
+              DROP INDEX IF EXISTS uq_occurrence_base;
+              DROP INDEX IF EXISTS uq_occurrence_slot;
+
+              CREATE UNIQUE INDEX IF NOT EXISTS uq_occurrence_rule_date_time
+                ON task_occurrences (task_rule_id, occurrence_date, occurrence_time);

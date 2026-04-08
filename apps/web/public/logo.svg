@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Personal Habit Tracker">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded app icon background -->
+  <rect width="64" height="64" rx="15" fill="url(#bg)"/>
+  <!-- Flame body -->
+  <path d="M32 51C23 51 16 43.5 16 35C16 26.5 20.5 20 26 16C26 21 28 23.5 30 21.5C30 17.5 32 11 38 7C36 13 38 17 41 15C45 11 45 18 45 26C47 21.5 46.5 17 44 15C48.5 20 48 29 46 35C46 43.5 40.5 51 32 51Z" fill="white" opacity="0.95"/>
+  <!-- Warm glow at flame base -->
+  <ellipse cx="32" cy="48" rx="8" ry="3.5" fill="#fb923c" opacity="0.5"/>
+  <!-- Checkmark inside flame -->
+  <path d="M25.5 34.5L30 39L38.5 28.5" stroke="#1d5fd1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

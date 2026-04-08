@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: 014-add-version-columns
+      author: gino
+      comment: "D-1 — ajout colonnes version pour optimistic locking JPA sur task_occurrences et task_overrides"
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            columnExists:
+              tableName: task_occurrences
+              columnName: version
+      changes:
+        - addColumn:
+            tableName: task_occurrences
+            columns:
+              - column:
+                  name: version
+                  type: bigint
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+        - addColumn:
+            tableName: task_overrides
+            columns:
+              - column:
+                  name: version
+                  type: bigint
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false

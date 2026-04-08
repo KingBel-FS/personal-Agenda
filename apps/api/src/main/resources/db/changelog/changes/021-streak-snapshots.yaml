@@ -1,0 +1,68 @@
+databaseChangeLog:
+  - changeSet:
+      id: 021-create-streak-snapshots
+      author: gino
+      changes:
+        - createTable:
+            tableName: streak_snapshots
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: snapshot_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: current_streak
+                  type: int
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: longest_streak
+                  type: int
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: streak_active
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: streak_snapshots
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_streak_snapshots_user
+            onDelete: CASCADE
+
+        - createIndex:
+            indexName: idx_streak_snapshots_user
+            tableName: streak_snapshots
+            columns:
+              - column:
+                  name: user_id
+
+        - addUniqueConstraint:
+            tableName: streak_snapshots
+            columnNames: user_id, snapshot_date
+            constraintName: uq_streak_snapshots_user_date

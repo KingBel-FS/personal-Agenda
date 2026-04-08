@@ -1,0 +1,472 @@
+<div class="sr-only" aria-live="polite" aria-atomic="true">
+  {{ toastMessage() }}
+</div>
+
+@if (toastMessage()) {
+  <aside class="toast toast--{{ toastType() }}" role="status">
+    <p class="toast__text">{{ toastMessage() }}</p>
+    <button type="button" class="toast__close" (click)="dismissToast()" aria-label="Fermer">x</button>
+  </aside>
+}
+
+@if (loading()) {
+  <div class="daily-page" aria-busy="true" aria-label="Chargement en cours">
+    <div class="date-nav">
+      <div class="sk-line sk-line--wide"></div>
+    </div>
+    <div class="context-header skeleton-block" aria-hidden="true">
+      <div class="sk-line sk-line--wide"></div>
+      <div class="sk-line sk-line--narrow"></div>
+      <div class="sk-progress"></div>
+      <div class="sk-stats">
+        <div class="sk-stat"></div>
+        <div class="sk-stat"></div>
+        <div class="sk-stat"></div>
+      </div>
+    </div>
+    <ul class="occurrence-list" aria-hidden="true">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <li class="occurrence-card occurrence-card--skeleton">
+          <div class="sk-icon"></div>
+          <div class="sk-content">
+            <div class="sk-line sk-line--med"></div>
+            <div class="sk-line sk-line--short"></div>
+          </div>
+        </li>
+      }
+    </ul>
+  </div>
+}
+
+@if (!loading() && errorMessage()) {
+  <div class="daily-page">
+    <div class="date-nav">
+      <button type="button" class="nav-arrow" (click)="prevDay()" aria-label="Jour precedent">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <input
+        type="date"
+        class="date-input"
+        [ngModel]="selectedDate()"
+        (ngModelChange)="onDateChange($event)"
+        aria-label="Choisir une date"
+      />
+      <button type="button" class="nav-arrow" (click)="nextDay()" aria-label="Jour suivant">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="state-error" role="alert">
+      <p>{{ errorMessage() }}</p>
+    </div>
+  </div>
+}
+
+@if (!loading() && !errorMessage() && data()) {
+  <div class="daily-page">
+    <div class="date-nav">
+      <button type="button" class="nav-arrow" (click)="prevDay()" aria-label="Jour precedent">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="date-nav__center">
+        <span class="date-nav__label">{{ formatDate(data()!.date) }}</span>
+        <input
+          type="date"
+          class="date-input"
+          [ngModel]="selectedDate()"
+          (ngModelChange)="onDateChange($event)"
+          aria-label="Choisir une date"
+        />
+      </div>
+      <button type="button" class="nav-arrow" (click)="nextDay()" aria-label="Jour suivant">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+
+    @if (!isToday()) {
+      <button type="button" class="btn-today" (click)="goToday()">Revenir a aujourd'hui</button>
+    }
+
+    @if (!data()!.beforeAccountCreation) {
+      <button type="button" class="btn-create-task" (click)="createTaskForSelectedDay()">Creer une tache</button>
+    }
+
+    <header class="context-header" aria-label="Contexte du jour">
+      <div class="context-header__date">
+        <span class="context-header__badge context-header__badge--{{ data()!.dayCategory | lowercase }}">
+          {{ dayCategoryLabel(data()!.dayCategory) }}
+        </span>
+      </div>
+
+      <div
+        class="progress-bar-wrap"
+        role="progressbar"
+        [attr.aria-valuenow]="data()!.progressPercent"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        [attr.aria-label]="'Progression : ' + data()!.progressPercent + '%'"
+      >
+        <div class="progress-bar" [style.width.%]="data()!.progressPercent"></div>
+      </div>
+      <p class="progress-label">{{ data()!.progressPercent }}% accompli</p>
+
+      <div class="stats-row" aria-label="Resume du jour">
+        <div class="stat-chip stat-chip--active">
+          <span class="stat-chip__value">{{ data()!.activeCount }}</span>
+          <span class="stat-chip__label">a faire</span>
+        </div>
+        <div class="stat-chip stat-chip--done">
+          <span class="stat-chip__value">{{ data()!.doneCount }}</span>
+          <span class="stat-chip__label">faites</span>
+        </div>
+        @if (data()!.missedCount > 0) {
+          <div class="stat-chip stat-chip--missed">
+            <span class="stat-chip__value">{{ data()!.missedCount }}</span>
+            <span class="stat-chip__label">manquees</span>
+          </div>
+        }
+        @if (data()!.skippedCount > 0) {
+          <div class="stat-chip stat-chip--skipped">
+            <span class="stat-chip__value">{{ data()!.skippedCount }}</span>
+            <span class="stat-chip__label">ignorees</span>
+          </div>
+        }
+      </div>
+
+      <p class="interaction-hint">
+        @if (canEditPastOccurrence()) {
+          Tape pour consulter. Appui long pour modifier l'heure ou le statut.
+        } @else {
+          Tape pour ouvrir. Appui long pour les actions.
+        }
+      </p>
+    </header>
+
+    @if (!isPastDate()) {
+      <div class="wakeup-override-bar">
+        <span class="wakeup-override-bar__label">
+          @if (wakeUpOverride(); as wo) {
+            Reveil : {{ wo.wakeUpTime.substring(0, 5) }}
+          } @else {
+            Reveil : profil par defaut
+          }
+        </span>
+        <button type="button" class="wakeup-override-bar__btn" (click)="openWakeUpSheet()" [disabled]="busy()">
+          Modifier
+        </button>
+      </div>
+    }
+
+    @if (data()!.occurrences.length === 0) {
+      <div class="empty-state">
+        <p class="empty-state__text">Aucune tache prevue ce jour-la.</p>
+      </div>
+    } @else {
+      <ul class="occurrence-list" aria-label="Taches du jour">
+        @for (occ of data()!.occurrences; track occ.id) {
+          <li
+            class="occurrence-card occurrence-card--{{ occ.status }}"
+            [class.occurrence-card--busy]="busy()"
+            [attr.aria-label]="occ.title + ' a ' + occ.occurrenceTime + ' - ' + statusLabel(occ.status)"
+            role="button"
+            [attr.tabindex]="occ.status === 'skipped' ? -1 : 0"
+            (pointerdown)="onPointerDown(occ)"
+            (pointerup)="onPointerUp(occ)"
+            (pointerleave)="onPointerLeave()"
+            (keydown.enter)="onPointerUp(occ)"
+            (keydown.space)="onPointerUp(occ); $event.preventDefault()"
+            (contextmenu)="$event.preventDefault()"
+          >
+            <span class="occ-icon" aria-hidden="true">{{ occ.icon }}</span>
+            <div class="occ-body">
+              <span class="occ-title">{{ occ.title }}</span>
+              @if (occ.description) {
+                <span class="occ-description">{{ occ.description }}</span>
+              }
+              @if (occ.totalSlotsPerDay > 1 && occ.slotOrder !== null) {
+                <span class="occ-slot-badge" aria-label="Repetition {{ occ.slotOrder }} sur {{ occ.totalSlotsPerDay }}">
+                  {{ occ.slotOrder }}/{{ occ.totalSlotsPerDay }}
+                </span>
+              }
+            </div>
+            <div class="occ-meta">
+              <time class="occ-time" [attr.datetime]="data()!.date + 'T' + occ.occurrenceTime">
+                {{ occ.occurrenceTime }}
+              </time>
+              <span class="occ-status occ-status--{{ occ.status }}" aria-hidden="true">
+                {{ statusIcon(occ.status) }}
+              </span>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+}
+
+@if (contextMenuOpen() && contextTarget(); as occ) {
+  <div class="sheet-backdrop" (click)="closeContextMenu()"></div>
+  <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="ctx-title">
+    <h2 id="ctx-title" class="sheet__title">{{ occ.icon }} {{ occ.title }}</h2>
+    <p class="sheet__subtitle">{{ occ.occurrenceTime }} - {{ statusLabel(occ.status) }}</p>
+
+    <div class="sheet__actions">
+      @if (occ.status !== 'done') {
+        <button type="button" class="sheet__btn sheet__btn--done" (click)="contextAction('done')">
+          <svg class="sheet__btn-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Marquer terminee
+        </button>
+      }
+      @if (occ.status !== 'missed') {
+        <button type="button" class="sheet__btn sheet__btn--missed" (click)="contextAction('missed')">
+          <svg class="sheet__btn-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Marquer manquee
+        </button>
+      }
+      @if (occ.status === 'done' || occ.status === 'missed') {
+        <button type="button" class="sheet__btn sheet__btn--edit" (click)="contextAction('revert')">
+          <svg class="sheet__btn-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          Remettre a faire
+        </button>
+      }
+      <button type="button" class="sheet__btn sheet__btn--edit" (click)="contextAction('edit-time')">
+        <svg class="sheet__btn-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Modifier l'heure
+      </button>
+      @if (!canEditPastOccurrence()) {
+        <button type="button" class="sheet__btn sheet__btn--edit" (click)="openManageEditor(occ, 'THIS_OCCURRENCE')">
+          <svg class="sheet__btn-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Modifier cette occurrence
+        </button>
+        @if (occ.recurring) {
+          <button type="button" class="sheet__btn sheet__btn--edit" (click)="contextAction('edit-series')">
+            <svg class="sheet__btn-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            Modifier la serie
+          </button>
+        }
+        <button type="button" class="sheet__btn sheet__btn--edit" (click)="contextAction('edit')">
+          <svg class="sheet__btn-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Modifier la description
+        </button>
+        <button type="button" class="sheet__btn sheet__btn--delete" (click)="contextAction('delete')">
+          <svg class="sheet__btn-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          Supprimer l'occurrence
+        </button>
+      }
+      @if (!occ.recurring && occ.status === 'planned') {
+        <button type="button" class="sheet__btn sheet__btn--edit" (click)="contextAction('reschedule')">
+          <svg class="sheet__btn-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Decaler (date + heure)
+        </button>
+      }
+      <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeContextMenu()">
+        Annuler
+      </button>
+    </div>
+  </section>
+}
+
+@if (editSheetOpen() && editTarget(); as occ) {
+  <div class="sheet-backdrop" (click)="closeEditSheet()"></div>
+  <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="edit-title">
+    <h2 id="edit-title" class="sheet__title">Modifier la description</h2>
+    <p class="sheet__subtitle">{{ occ.icon }} {{ occ.title }}</p>
+
+    <div class="sheet__form">
+      <textarea
+        class="sheet__textarea"
+        rows="3"
+        placeholder="Description de l'occurrence..."
+        [ngModel]="editDescriptionValue()"
+        (ngModelChange)="editDescriptionValue.set($event)"
+        aria-label="Description"
+      ></textarea>
+    </div>
+
+    <div class="sheet__actions">
+      <button type="button" class="sheet__btn sheet__btn--confirm" (click)="confirmEditDescription()">
+        Enregistrer
+      </button>
+      <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeEditSheet()">
+        Annuler
+      </button>
+    </div>
+  </section>
+}
+
+@if (deleteSheetOpen() && deleteTarget(); as occ) {
+  <div class="sheet-backdrop" (click)="closeDeleteSheet()"></div>
+  <section class="bottom-sheet bottom-sheet--confirm" role="alertdialog" aria-modal="true" aria-labelledby="delete-title">
+    <div class="sheet__icon-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+    </div>
+    <h2 id="delete-title" class="sheet__title">Supprimer "{{ occ.title }}" ?</h2>
+    <p class="sheet__reassurance">Seule l'occurrence de cette journee sera supprimee. La serie n'est pas affectee.</p>
+
+    <div class="sheet__actions">
+      <button type="button" class="sheet__btn sheet__btn--confirm sheet__btn--danger" (click)="confirmDelete()">
+        Supprimer
+      </button>
+      <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeDeleteSheet()">
+        Annuler
+      </button>
+    </div>
+  </section>
+}
+
+@if (editTimeSheetOpen() && editTimeTarget(); as occ) {
+  <div class="sheet-backdrop" (click)="closeEditTimeSheet()"></div>
+  <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="edit-time-title">
+    <h2 id="edit-time-title" class="sheet__title">Modifier l'heure</h2>
+    <p class="sheet__subtitle">{{ occ.icon }} {{ occ.title }}</p>
+
+    <div class="sheet__form">
+      <label class="sheet__label">
+        Nouvelle heure
+        <input
+          type="time"
+          class="sheet__input"
+          [ngModel]="editTimeValue()"
+          (ngModelChange)="editTimeValue.set($event)"
+          aria-label="Nouvelle heure"
+        />
+      </label>
+    </div>
+
+    <div class="sheet__actions">
+      <button type="button" class="sheet__btn sheet__btn--confirm" (click)="confirmEditTime()">
+        Enregistrer
+      </button>
+      <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeEditTimeSheet()">
+        Annuler
+      </button>
+    </div>
+  </section>
+}
+
+@if (rescheduleSheetOpen() && rescheduleTarget(); as occ) {
+  <div class="sheet-backdrop" (click)="closeRescheduleSheet()"></div>
+  <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="reschedule-title">
+    <h2 id="reschedule-title" class="sheet__title">Decaler la tache</h2>
+    <p class="sheet__subtitle">{{ occ.icon }} {{ occ.title }}</p>
+
+    <div class="sheet__form">
+      <label class="sheet__label">
+        Nouvelle date
+        <input
+          type="date"
+          class="sheet__input"
+          [ngModel]="rescheduleDate()"
+          (ngModelChange)="rescheduleDate.set($event)"
+          aria-label="Nouvelle date"
+        />
+      </label>
+      <label class="sheet__label">
+        Nouvelle heure
+        <input
+          type="time"
+          class="sheet__input"
+          [ngModel]="rescheduleTime()"
+          (ngModelChange)="rescheduleTime.set($event)"
+          aria-label="Nouvelle heure"
+        />
+      </label>
+    </div>
+
+    <div class="sheet__actions">
+      <button type="button" class="sheet__btn sheet__btn--confirm" (click)="confirmReschedule()">
+        Decaler
+      </button>
+      <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeRescheduleSheet()">
+        Annuler
+      </button>
+    </div>
+  </section>
+}
+
+@if (detailSheetOpen() && detailTarget(); as occ) {
+  <div class="sheet-backdrop" (click)="closeDetailSheet()"></div>
+  <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+    <div class="detail-header">
+      <span class="detail-icon">{{ occ.icon }}</span>
+      <div>
+        <h2 id="detail-title" class="sheet__title">{{ occ.title }}</h2>
+        <p class="sheet__subtitle">{{ occ.occurrenceTime }} - {{ statusLabel(occ.status) }}</p>
+      </div>
+    </div>
+
+    @if (occ.description) {
+      <p class="detail-description">{{ occ.description }}</p>
+    } @else {
+      <p class="detail-empty">Aucune description.</p>
+    }
+
+    <div class="sheet__actions">
+      @if (occ.status !== 'done') {
+        <button type="button" class="sheet__btn sheet__btn--done" (click)="detailAction('done')">
+          <svg class="sheet__btn-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Marquer terminee
+        </button>
+      }
+      @if (occ.status !== 'missed') {
+        <button type="button" class="sheet__btn sheet__btn--missed" (click)="detailAction('missed')">
+          <svg class="sheet__btn-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Marquer manquee
+        </button>
+      }
+      @if (occ.status === 'done' || occ.status === 'missed') {
+        <button type="button" class="sheet__btn sheet__btn--edit" (click)="detailAction('revert')">
+          <svg class="sheet__btn-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          Remettre a faire
+        </button>
+      }
+      <button type="button" class="sheet__btn sheet__btn--edit" (click)="closeDetailSheet(); openEditTimeSheet(occ)">
+        <svg class="sheet__btn-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Modifier l'heure
+      </button>
+      @if (!occ.recurring && occ.status === 'planned') {
+        <button type="button" class="sheet__btn sheet__btn--edit" (click)="rescheduleFromDetail()">
+          <svg class="sheet__btn-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Decaler (date + heure)
+        </button>
+      }
+      <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeDetailSheet()">
+        Fermer
+      </button>
+    </div>
+  </section>
+}
+
+@if (wakeUpSheetOpen()) {
+  <div class="sheet-backdrop" (click)="closeWakeUpSheet()"></div>
+  <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="wakeup-title">
+    <h2 id="wakeup-title" class="sheet__title">Heure de reveil</h2>
+    <p class="sheet__subtitle">{{ formatDate(selectedDate()) }}</p>
+
+    <div class="sheet__form">
+      <label class="sheet__label">
+        Heure de reveil ce jour
+        <input
+          type="time"
+          class="sheet__input"
+          [ngModel]="wakeUpTimeValue()"
+          (ngModelChange)="wakeUpTimeValue.set($event)"
+          aria-label="Heure de reveil"
+        />
+      </label>
+    </div>
+
+    <div class="sheet__actions">
+      <button type="button" class="sheet__btn sheet__btn--confirm" (click)="confirmWakeUpOverride()" [disabled]="busy()">
+        Enregistrer
+      </button>
+      @if (wakeUpOverride()) {
+        <button type="button" class="sheet__btn sheet__btn--delete" (click)="deleteWakeUpOverride()" [disabled]="busy()">
+          Remettre par defaut
+        </button>
+      }
+      <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeWakeUpSheet()">
+        Annuler
+      </button>
+    </div>
+  </section>
+}

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IA - Color Themes</title>
+  <style>
+    :root { color-scheme: light dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: #f5f6f8;
+      color: #1d2430;
+    }
+    header {
+      padding: 32px 20px 12px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 { margin: 0 0 8px; font-size: 32px; }
+    p { margin: 0; line-height: 1.5; }
+    .grid {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .theme {
+      border-radius: 24px;
+      overflow: hidden;
+      background: white;
+      box-shadow: 0 18px 48px rgba(14, 24, 39, 0.12);
+    }
+    .bar {
+      display: flex;
+      min-height: 84px;
+    }
+    .swatch { flex: 1; padding: 12px; color: white; font-size: 12px; display: flex; align-items: end; }
+    .content { padding: 18px; }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+    .chip {
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #eef2f7;
+    }
+    .card {
+      border-radius: 16px;
+      padding: 14px;
+      background: #f7f9fc;
+      border: 1px solid rgba(29, 36, 48, 0.08);
+    }
+    .meta { margin-top: 10px; color: #556070; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>IA - Exploration Colorimétrique</h1>
+    <p>Trois directions compatibles avec la UX spec : lisibilité mobile, sémantique des statuts et différenciation immédiate des types de jour.</p>
+  </header>
+  <main class="grid">
+    <section class="theme">
+      <div class="bar">
+        <div class="swatch" style="background:#2f6fed">Travail</div>
+        <div class="swatch" style="background:#39a96b">Vacances</div>
+        <div class="swatch" style="background:#6b7280">Weekend/Férié</div>
+        <div class="swatch" style="background:#ff7a00">Streak</div>
+      </div>
+      <div class="content">
+        <h2>Cockpit Contextuel</h2>
+        <div class="chips">
+          <span class="chip">Recommandé</span>
+          <span class="chip">Sobre</span>
+          <span class="chip">Fiable</span>
+        </div>
+        <div class="card">Vue Aujourd'hui claire, accents réservés aux statuts, hiérarchie centrée sur la compréhension du jour.</div>
+        <div class="meta">Palette principale : #2F6FED, #39A96B, #6B7280, #FF7A00</div>
+      </div>
+    </section>
+    <section class="theme">
+      <div class="bar">
+        <div class="swatch" style="background:#004e89">Travail</div>
+        <div class="swatch" style="background:#2a9d8f">Vacances</div>
+        <div class="swatch" style="background:#7a6f63">Weekend/Férié</div>
+        <div class="swatch" style="background:#e76f51">Streak</div>
+      </div>
+      <div class="content">
+        <h2>Agenda Editorial</h2>
+        <div class="chips">
+          <span class="chip">Dense</span>
+          <span class="chip">Analytique</span>
+        </div>
+        <div class="card">Approche plus mature et informationnelle, utile si l'accent se déplace vers les stats et l'analyse historique.</div>
+        <div class="meta">Palette principale : #004E89, #2A9D8F, #7A6F63, #E76F51</div>
+      </div>
+    </section>
+    <section class="theme">
+      <div class="bar">
+        <div class="swatch" style="background:#335c67">Travail</div>
+        <div class="swatch" style="background:#5ab17d">Vacances</div>
+        <div class="swatch" style="background:#8d99ae">Weekend/Férié</div>
+        <div class="swatch" style="background:#fb8500">Streak</div>
+      </div>
+      <div class="content">
+        <h2>Gamification Maîtrisée</h2>
+        <div class="chips">
+          <span class="chip">Énergique</span>
+          <span class="chip">Badge-first</span>
+        </div>
+        <div class="card">Version plus expressive, intéressante pour pousser davantage les jalons et les récompenses sans aller jusqu'au style ludique complet.</div>
+        <div class="meta">Palette principale : #335C67, #5AB17D, #8D99AE, #FB8500</div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

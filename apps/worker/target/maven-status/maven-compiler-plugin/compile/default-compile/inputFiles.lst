@@ -1,0 +1,11 @@
+C:\Dev\personal-Agenda\apps\worker\src\main\java\com\ia\worker\config\WorkerBeansConfig.java
+C:\Dev\personal-Agenda\apps\worker\src\main\java\com\ia\worker\holiday\HolidayGovernmentClient.java
+C:\Dev\personal-Agenda\apps\worker\src\main\java\com\ia\worker\holiday\HolidaySyncWorkerService.java
+C:\Dev\personal-Agenda\apps\worker\src\main\java\com\ia\worker\notification\ContextualNotificationService.java
+C:\Dev\personal-Agenda\apps\worker\src\main\java\com\ia\worker\notification\NotificationRecoveryService.java
+C:\Dev\personal-Agenda\apps\worker\src\main\java\com\ia\worker\notification\NotificationSchedulingService.java
+C:\Dev\personal-Agenda\apps\worker\src\main\java\com\ia\worker\notification\NotificationSendingService.java
+C:\Dev\personal-Agenda\apps\worker\src\main\java\com\ia\worker\notification\WebPushSender.java
+C:\Dev\personal-Agenda\apps\worker\src\main\java\com\ia\worker\occurrence\DayClassificationService.java
+C:\Dev\personal-Agenda\apps\worker\src\main\java\com\ia\worker\occurrence\OccurrenceMaterializationService.java
+C:\Dev\personal-Agenda\apps\worker\src\main\java\com\ia\worker\WorkerApplication.java

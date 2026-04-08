@@ -1,0 +1,69 @@
+databaseChangeLog:
+  - changeSet:
+      id: 023-create-push-subscriptions
+      author: gino
+      changes:
+        - createTable:
+            tableName: push_subscriptions
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: endpoint
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: auth_key
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: p256dh_key
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: revoked_at
+                  type: timestamptz
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: push_subscriptions
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_push_subscriptions_user
+            onDelete: CASCADE
+
+        - createIndex:
+            indexName: idx_push_subscriptions_user_id
+            tableName: push_subscriptions
+            columns:
+              - column:
+                  name: user_id
+
+        - addUniqueConstraint:
+            tableName: push_subscriptions
+            columnNames: user_id, endpoint
+            constraintName: uq_push_subscriptions_user_endpoint

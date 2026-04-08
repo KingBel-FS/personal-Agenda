@@ -1,0 +1,146 @@
+<main class="legal-shell">
+  <section class="hero">
+    <p class="eyebrow">Personal Habit Tracker</p>
+    <h1>Mentions légales et politique de confidentialité</h1>
+  </section>
+
+  <section class="panel" aria-labelledby="legal-title">
+    <h2 id="legal-title">Mentions légales</h2>
+
+    <p>
+      Personal Habit Tracker est une application personnelle utilisée à titre privé. Elle n'est pas
+      exploitée à des fins commerciales et n'est pas ouverte au public général.
+    </p>
+
+    <h3>Responsable de traitement</h3>
+    <p>
+      Le responsable de traitement est l'utilisateur administrateur de cette instance. Aucune donnée
+      n'est transmise à des tiers.
+    </p>
+
+    <h3>Hébergement</h3>
+    <p>
+      L'application est auto-hébergée. Les données sont stockées localement dans une base de données
+      PostgreSQL contrôlée par l'utilisateur.
+    </p>
+  </section>
+
+  <section class="panel" aria-labelledby="privacy-title">
+    <h2 id="privacy-title">Politique de confidentialité</h2>
+
+    <h3>Données collectées</h3>
+    <p>L'application collecte et stocke les données suivantes :</p>
+    <ul>
+      <li>Adresse email (identifiant unique)</li>
+      <li>Pseudo</li>
+      <li>Date de naissance</li>
+      <li>Zone géographique et fuseau horaire</li>
+      <li>Horaires de réveil par type de journée</li>
+      <li>Périodes de vacances</li>
+      <li>Photo de profil (optionnelle)</li>
+    </ul>
+
+    <h3>Finalité du traitement</h3>
+    <p>
+      Ces données sont utilisées exclusivement pour personnaliser la planification des habitudes et
+      le calcul des jours fériés. Elles ne sont pas partagées avec des tiers et ne font l'objet
+      d'aucun traitement commercial.
+    </p>
+
+    <h3>Durée de conservation</h3>
+    <p>
+      Les données sont conservées tant que le compte est actif. En cas de suppression du compte,
+      l'ensemble des données personnelles est effacé dans un délai maximal de 30 minutes.
+    </p>
+
+    <h3>Vos droits (RGPD)</h3>
+    <p>
+      Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez des
+      droits suivants :
+    </p>
+    <ul>
+      <li>Droit d'accès à vos données</li>
+      <li>Droit de rectification</li>
+      <li>Droit à l'effacement (disponible depuis la page profil)</li>
+      <li>Droit à la portabilité</li>
+    </ul>
+    <p>
+      La suppression de votre compte est disponible depuis
+      <a routerLink="/profile">votre page profil</a>. Elle est immédiate et irréversible.
+    </p>
+
+    <h3>Cookies et traceurs</h3>
+
+    <h4>Cookies essentiels (toujours actifs)</h4>
+    <p>
+      Ces cookies sont strictement nécessaires au fonctionnement de l'application. Ils ne requièrent
+      pas votre consentement et restent actifs même si vous refusez les cookies optionnels.
+    </p>
+    <table class="cookie-table" aria-label="Liste des cookies essentiels">
+      <thead>
+        <tr><th>Cookie</th><th>Finalité</th><th>Durée</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>pht_refresh_token</code></td>
+          <td>Maintien de votre session (authentification)</td>
+          <td>30 jours</td>
+        </tr>
+        <tr>
+          <td><code>pht_cookie_consent</code></td>
+          <td>Mémorisation de votre choix de consentement</td>
+          <td>Permanent (localStorage)</td>
+        </tr>
+        <tr>
+          <td><code>pht_access_token</code></td>
+          <td>Jeton d'accès temporaire à l'API</td>
+          <td>15 minutes (localStorage)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Cookies d'analyse (optionnels)</h4>
+    <p>
+      Si vous acceptez les cookies, l'application active <strong>Matomo</strong>, un outil d'analyse
+      de trafic auto-hébergé. Les données collectées restent sur notre serveur et ne sont jamais
+      transmises à des tiers. Matomo nous permet de comprendre comment l'application est utilisée
+      afin de l'améliorer.
+    </p>
+    <table class="cookie-table" aria-label="Liste des cookies d'analyse">
+      <thead>
+        <tr><th>Cookie</th><th>Finalité</th><th>Durée</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>_pk_id.*</code></td>
+          <td>Identifiant visiteur Matomo (analyse de trafic)</td>
+          <td>13 mois</td>
+        </tr>
+        <tr>
+          <td><code>_pk_ses.*</code></td>
+          <td>Session visiteur Matomo</td>
+          <td>30 minutes</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Vous pouvez modifier votre choix à tout moment en supprimant vos données de navigation
+      (localStorage) depuis les paramètres de votre navigateur. Le bandeau de consentement
+      réapparaîtra alors.
+    </p>
+
+    <h4>Aucun cookie publicitaire</h4>
+    <p>
+      L'application n'utilise aucun cookie publicitaire, aucun pixel de suivi tiers et ne partage
+      aucune donnée avec des régies publicitaires ou des réseaux sociaux.
+    </p>
+  </section>
+
+  <nav class="back-nav" aria-label="Navigation">
+    @if (authService.isAuthenticated()) {
+      <a routerLink="/profile">Retour au profil</a>
+    } @else {
+      <a routerLink="/login">Retour à la connexion</a>
+    }
+  </nav>
+</main>

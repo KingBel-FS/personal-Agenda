@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 014-hash-activation-tokens
+      author: gino
+      comment: "P-04: hash activation tokens before storing — prevents plain-text token exposure in case of DB leak"
+      changes:
+        - addColumn:
+            tableName: activation_tokens
+            columns:
+              - column:
+                  name: token_hash
+                  type: varchar(255)
+        - sql:
+            sql: |
+              UPDATE activation_tokens SET token_hash = encode(sha256(token::bytea), 'hex');
+        - addNotNullConstraint:
+            tableName: activation_tokens
+            columnName: token_hash
+            validate: true
+        - addUniqueConstraint:
+            tableName: activation_tokens
+            columnNames: token_hash
+            constraintName: uq_activation_tokens_token_hash
+        - dropUniqueConstraint:
+            tableName: activation_tokens
+            constraintName: uq_activation_tokens_token
+        - dropColumn:
+            tableName: activation_tokens
+            columnName: token

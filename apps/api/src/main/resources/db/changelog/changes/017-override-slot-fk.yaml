@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: 017-override-add-slot-fk
+      author: gino
+      comment: "Story 2.5 — ajout task_time_slot_id + remplacement contrainte unique sur task_overrides"
+      changes:
+        - addColumn:
+            tableName: task_overrides
+            columns:
+              - column:
+                  name: task_time_slot_id
+                  type: uuid
+        - addForeignKeyConstraint:
+            baseTableName: task_overrides
+            baseColumnNames: task_time_slot_id
+            referencedTableName: task_time_slots
+            referencedColumnNames: id
+            constraintName: fk_task_overrides_task_time_slot_id
+        - dropUniqueConstraint:
+            tableName: task_overrides
+            constraintName: uq_task_overrides_rule_date
+        - addUniqueConstraint:
+            tableName: task_overrides
+            columnNames: task_rule_id, occurrence_date, task_time_slot_id
+            constraintName: uq_task_overrides_rule_date_slot

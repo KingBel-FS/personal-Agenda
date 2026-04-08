@@ -1,0 +1,68 @@
+databaseChangeLog:
+  - changeSet:
+      id: 028-create-export-audits
+      author: codex
+      changes:
+        - createTable:
+            tableName: export_audits
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: export_format
+                  type: varchar(10)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: export_scope
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: period_from
+                  type: date
+              - column:
+                  name: period_to
+                  type: date
+              - column:
+                  name: status
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: file_name
+                  type: varchar(255)
+              - column:
+                  name: row_count
+                  type: int
+              - column:
+                  name: duration_ms
+                  type: bigint
+              - column:
+                  name: error_message
+                  type: text
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+              - column:
+                  name: completed_at
+                  type: timestamp with time zone
+        - createIndex:
+            indexName: idx_export_audits_user_created_at
+            tableName: export_audits
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: created_at

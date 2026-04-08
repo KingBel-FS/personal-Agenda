@@ -1,0 +1,54 @@
+databaseChangeLog:
+  - changeSet:
+      id: 015-create-task-time-slots
+      author: gino
+      comment: "Story 2.5 — table des créneaux intra-journée (multi-slot par règle de tâche)"
+      changes:
+        - createTable:
+            tableName: task_time_slots
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: task_rule_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: slot_order
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: time_mode
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fixed_time
+                  type: time
+              - column:
+                  name: wake_up_offset_minutes
+                  type: int
+              - column:
+                  name: after_previous_minutes
+                  type: int
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: task_time_slots
+            baseColumnNames: task_rule_id
+            referencedTableName: task_rules
+            referencedColumnNames: id
+            constraintName: fk_task_time_slots_task_rule_id
+        - addUniqueConstraint:
+            tableName: task_time_slots
+            columnNames: task_rule_id, slot_order
+            constraintName: uq_task_time_slots_rule_order

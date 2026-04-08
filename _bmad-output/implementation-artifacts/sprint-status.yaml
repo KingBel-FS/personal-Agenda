@@ -1,0 +1,87 @@
+# generated: 2026-03-24
+# last_updated: 2026-03-24
+# project: IA
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: c:\Dev\personal-Agenda\_bmad-output\implementation-artifacts
+#
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog -> in-progress: Automatically when first story is created
+#   - in-progress -> done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically creates next story after previous one is 'done' to incorporate learnings
+
+generated: 2026-03-24
+last_updated: 2026-03-27T23:38
+project: IA
+project_key: NOKEY
+tracking_system: file-system
+story_location: c:\Dev\personal-Agenda\_bmad-output\implementation-artifacts
+
+development_status:
+  epic-1: in-progress
+  1-1-inscription-activation-compte: review
+  1-2-connexion-refresh-reset: review
+  1-3-profil-reveil-zone: review
+  1-4-vacances-sync-feries: review
+  1-5-legal-suppression-compte: done
+  epic-1-retrospective: optional
+
+  epic-2: done
+  2-1-tache-ponctuelle-wizard: done
+  2-2-taches-recurrentes: done
+  2-3-materialisation-occurrences: done
+  2-4-edition-suppression-occurrences: done
+  2-5-repetitions-intraday: done
+  epic-2-retrospective: optional
+
+  epic-3: in-progress
+  3-1-vue-aujourdhui-contexte: in-progress
+  3-2-statut-occurrence: review
+  3-3-badge-feedback-immediat: review
+  3-4-streaks-badges-abus: review
+  epic-3-retrospective: optional
+
+  epic-4: in-progress
+  4-1-enrollment-push-centre-notifications: review
+  4-2-scheduling-notifications-sequentielles: review
+  4-3-actions-notification-annulation: review
+  4-4-notifications-contextuelles: review
+  epic-4-retrospective: optional
+
+  epic-5: in-progress
+  5-1-agenda-semaine-mois: review
+  5-2-actions-contextuelles-agenda: ready-for-dev
+  5-3-objectifs-hebdo-mensuels: review
+  5-4-dashboard-stats-kpi: review
+  5-5-export-donnees: review
+  epic-5-retrospective: optional
+
+  epic-6: in-progress
+  6-1-sync-temps-reel: review
+  6-2-theme-tokens-composants: review
+  6-3-accessibilite-motion-safe: review
+  6-4-expression-visuelle-streak-polish: review
+  epic-6-retrospective: optional

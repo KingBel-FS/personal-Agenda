@@ -1,0 +1,311 @@
+<section class="stats-page">
+  <header class="stats-hero">
+    <div class="stats-hero__copy">
+      <p class="stats-hero__eyebrow">Lecture des rythmes</p>
+      <h1>Statistiques</h1>
+      <p class="stats-hero__lead">
+        Explore ton &eacute;volution quotidienne, hebdomadaire, mensuelle et annuelle. Chaque bloc compare la p&eacute;riode affich&eacute;e
+        &agrave; la pr&eacute;c&eacute;dente et met en &eacute;vidence les tendances utiles.
+      </p>
+    </div>
+
+    @if (dashboard(); as dashboard) {
+      <div class="stats-hero__summary">
+        <article class="stats-hero__pill stats-hero__pill--streak">
+          <app-streak-flame
+            [current]="streak()?.currentStreak ?? 0"
+            [best]="streak()?.longestStreak ?? 0"
+            [active]="streak()?.streakActive ?? false"
+            label="Série"
+            variant="mobile"
+          />
+        </article>
+        <article class="stats-hero__pill">
+          <span>Compte ouvert</span>
+          <strong>{{ dashboard.accountCreatedAt | date: 'dd/MM/yyyy' }}</strong>
+        </article>
+        <article class="stats-hero__pill">
+          <span>Mis &agrave; jour</span>
+          <strong>{{ dashboard.generatedAt | date: 'dd/MM/yyyy HH:mm' }}</strong>
+        </article>
+      </div>
+    }
+  </header>
+
+  @if (errorMessage()) {
+    <p class="stats-feedback stats-feedback--error" role="alert">{{ errorMessage() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="stats-state">Chargement du tableau de bord...</p>
+  } @else {
+    <section class="stats-grid">
+      @for (period of periods(); track period.periodType) {
+        <article class="stats-card">
+          <div class="stats-card__header">
+            <div>
+              <p class="stats-card__eyebrow">{{ period.label }}</p>
+              <h2>{{ currentHeading(period) }}</h2>
+            </div>
+            <div class="stats-card__nav">
+              <button type="button" class="stats-card__nav-btn" (click)="previousPeriod(period)" aria-label="P&eacute;riode pr&eacute;c&eacute;dente">&lsaquo;</button>
+              <button type="button" class="stats-card__detail-btn" (click)="openPeriodDetail(period)">D&eacute;tail</button>
+              <button type="button" class="stats-card__nav-btn" [disabled]="disableNext(period)" (click)="nextPeriod(period)" aria-label="P&eacute;riode suivante">&rsaquo;</button>
+            </div>
+          </div>
+
+          <div class="stats-compare-head">
+            <div class="stats-compare-head__block">
+              <span>Actuelle</span>
+              <strong>{{ currentHeading(period) }}</strong>
+            </div>
+            <div class="stats-compare-head__block">
+              <span>Pr&eacute;c&eacute;dente</span>
+              <strong>{{ previousHeading(period) }}</strong>
+            </div>
+          </div>
+
+          <div class="stats-kpi-grid">
+            <article class="stats-kpi-card">
+              <span>Occurrences</span>
+              <strong>{{ period.current.totalCount }}</strong>
+              <small>Avant : {{ period.previous.totalCount }}</small>
+            </article>
+            <article class="stats-kpi-card">
+              <span>Termin&eacute;es</span>
+              <strong>{{ period.current.doneCount }}</strong>
+              <small>Avant : {{ period.previous.doneCount }}</small>
+            </article>
+            <article class="stats-kpi-card">
+              <span>Manqu&eacute;es</span>
+              <strong>{{ period.current.missedCount }}</strong>
+              <small>Avant : {{ period.previous.missedCount }}</small>
+            </article>
+            <article class="stats-kpi-card">
+              <span>T&acirc;ches</span>
+              <strong>{{ period.current.taskCount }}</strong>
+              <small>Avant : {{ period.previous.taskCount }}</small>
+            </article>
+          </div>
+        </article>
+      }
+    </section>
+  }
+
+  @if (detailLoading()) {
+    <div class="stats-modal" role="dialog" aria-modal="true">
+      <section class="stats-detail">
+        <p class="stats-state">Chargement du d&eacute;tail de la t&acirc;che...</p>
+      </section>
+    </div>
+  }
+
+  @if (selectedPeriodDetail(); as period) {
+    <div class="stats-modal" role="dialog" aria-modal="true" aria-labelledby="stats-period-title" (click)="closePeriodDetail()">
+      <section class="stats-detail stats-detail--period" (click)="stopModalPropagation($event)">
+        <div class="stats-detail__head">
+          <div>
+            <p class="stats-card__eyebrow">{{ period.label }}</p>
+            <h2 id="stats-period-title">{{ currentHeading(period) }}</h2>
+          </div>
+          <button type="button" class="stats-detail__close" (click)="closePeriodDetail()">Fermer</button>
+        </div>
+
+        <div class="stats-compare-head">
+          <div class="stats-compare-head__block">
+            <span>Actuelle</span>
+            <strong>{{ currentHeading(period) }}</strong>
+          </div>
+          <div class="stats-compare-head__block">
+            <span>Pr&eacute;c&eacute;dente</span>
+            <strong>{{ previousHeading(period) }}</strong>
+          </div>
+        </div>
+
+        <section class="stats-card__tasks stats-card__tasks--detail">
+          <div class="stats-card__tasks-head">
+            <h3>T&acirc;ches marquantes</h3>
+            <span>{{ period.taskBreakdown.length }}</span>
+          </div>
+
+          @if (period.taskBreakdown.length === 0) {
+            <p class="stats-card__empty">Aucune occurrence sur cette p&eacute;riode.</p>
+          } @else {
+            <ul>
+              @for (task of period.taskBreakdown; track task.taskDefinitionId) {
+                <li>
+                  <button type="button" class="stats-task-row" (click)="openTaskDetail(period, task)">
+                    <div class="stats-task-row__main">
+                      <span class="stats-task-row__icon">{{ task.icon }}</span>
+                      <div class="stats-task-row__text">
+                        <strong>{{ task.title }}</strong>
+                        <span>Actuelle {{ task.doneCount }}/{{ task.totalCount }} &middot; Avant {{ task.doneCount - task.doneCountDelta }}</span>
+                      </div>
+                    </div>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        <div class="stats-visuals">
+          <section class="chart-card">
+            <div class="chart-card__head">
+              <h3>Courbe de r&eacute;gularit&eacute;</h3>
+              <div class="chart-card__controls">
+                <button
+                  type="button"
+                  class="chart-card__nav-btn"
+                  [disabled]="!canSlideHistoryToPast(period)"
+                  (click)="slideHistory(period, -1)"
+                  aria-label="Voir les unit&eacute;s pr&eacute;c&eacute;dentes"
+                >&lsaquo;</button>
+                <span>{{ detailHistoryLabel(period) }}</span>
+                <button
+                  type="button"
+                  class="chart-card__nav-btn"
+                  [disabled]="!canSlideHistoryToFuture(period)"
+                  (click)="slideHistory(period, 1)"
+                  aria-label="Voir les unit&eacute;s suivantes"
+                >&rsaquo;</button>
+              </div>
+            </div>
+            <svg viewBox="0 0 260 110" class="line-chart" preserveAspectRatio="none" aria-hidden="true">
+              <path class="line-chart__grid" d="M0 20 H260 M0 55 H260 M0 90 H260" />
+              <path class="line-chart__path" [attr.d]="linePath(period)" />
+            </svg>
+            <div class="chart-labels">
+              @for (point of visibleHistory(period); track point.label) {
+                <span>{{ compactAxisLabel(period, point) }}</span>
+              }
+            </div>
+          </section>
+
+          <section class="chart-card">
+            <div class="chart-card__head">
+              <h3>Histogramme des termin&eacute;es</h3>
+              <div class="chart-card__controls">
+                <button
+                  type="button"
+                  class="chart-card__nav-btn"
+                  [disabled]="!canSlideHistoryToPast(period)"
+                  (click)="slideHistory(period, -1)"
+                  aria-label="Voir les unit&eacute;s pr&eacute;c&eacute;dentes"
+                >&lsaquo;</button>
+                <span>Historique</span>
+                <button
+                  type="button"
+                  class="chart-card__nav-btn"
+                  [disabled]="!canSlideHistoryToFuture(period)"
+                  (click)="slideHistory(period, 1)"
+                  aria-label="Voir les unit&eacute;s suivantes"
+                >&rsaquo;</button>
+              </div>
+            </div>
+            <div class="bar-chart" aria-hidden="true">
+              @for (point of visibleHistory(period); track point.label) {
+                <div class="bar-chart__item">
+                  <strong>{{ point.doneCount }}</strong>
+                  <div class="bar-chart__bar-wrap">
+                    <span class="bar-chart__bar" [style.height.%]="barHeight(point, historyMax(period))"></span>
+                  </div>
+                  <small>{{ compactAxisLabel(period, point) }}</small>
+                </div>
+              }
+            </div>
+          </section>
+
+          <section class="chart-card">
+            <div class="chart-card__head">
+              <h3>Camembert des statuts</h3>
+              <span>{{ period.current.completionRate }}%</span>
+            </div>
+            <div class="donut-wrap">
+              <div class="donut-chart" [style.background]="donutBackground(period.current)">
+                <div class="donut-chart__center">{{ period.current.totalCount }}</div>
+              </div>
+              <div class="donut-legend">
+                <span><i class="legend-dot legend-dot--done"></i> Termin&eacute;es {{ period.current.doneCount }}</span>
+                <span><i class="legend-dot legend-dot--missed"></i> Manqu&eacute;es {{ period.current.missedCount }}</span>
+                <span><i class="legend-dot legend-dot--planned"></i> Planifi&eacute;es {{ period.current.plannedCount }}</span>
+                <span><i class="legend-dot legend-dot--skipped"></i> Ignor&eacute;es {{ period.current.skippedCount }}</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </div>
+  }
+
+  @if (selectedTaskDetail(); as detail) {
+    <div class="stats-modal" role="dialog" aria-modal="true" aria-labelledby="stats-detail-title" (click)="closeTaskDetail()">
+      <section class="stats-detail" (click)="stopModalPropagation($event)">
+        <div class="stats-detail__head">
+          <div>
+            <p class="stats-card__eyebrow">{{ detail.label }}</p>
+            <h2 id="stats-detail-title">{{ detail.icon }} {{ detail.title }}</h2>
+          </div>
+          <button type="button" class="stats-detail__close" (click)="closeTaskDetail()">Fermer</button>
+        </div>
+
+        <div class="stats-compare-head">
+          <div class="stats-compare-head__block">
+            <span>Actuelle</span>
+            <strong>{{ detail.current.periodStart | date: 'dd/MM/yyyy' }} &rarr; {{ detail.current.periodEnd | date: 'dd/MM/yyyy' }}</strong>
+          </div>
+          <div class="stats-compare-head__block">
+            <span>Pr&eacute;c&eacute;dente</span>
+            <strong>{{ detail.previous.periodStart | date: 'dd/MM/yyyy' }} &rarr; {{ detail.previous.periodEnd | date: 'dd/MM/yyyy' }}</strong>
+          </div>
+        </div>
+
+        <div class="stats-kpi-grid">
+          <article class="stats-kpi-card">
+            <span>Occurrences</span>
+            <strong>{{ detail.current.totalCount }}</strong>
+            <small>Avant : {{ detail.previous.totalCount }}</small>
+          </article>
+          <article class="stats-kpi-card">
+            <span>Termin&eacute;es</span>
+            <strong>{{ detail.current.doneCount }}</strong>
+            <small>Avant : {{ detail.previous.doneCount }}</small>
+          </article>
+          <article class="stats-kpi-card">
+            <span>Manqu&eacute;es</span>
+            <strong>{{ detail.current.missedCount }}</strong>
+            <small>Avant : {{ detail.previous.missedCount }}</small>
+          </article>
+          <article class="stats-kpi-card">
+            <span>Planifi&eacute;es</span>
+            <strong>{{ detail.current.plannedCount }}</strong>
+            <small>Avant : {{ detail.previous.plannedCount }}</small>
+          </article>
+        </div>
+
+        <section class="stats-detail__history">
+          <div class="stats-card__tasks-head">
+            <h3>Occurrences r&eacute;centes</h3>
+            <span>{{ detail.recentOccurrences.length }}</span>
+          </div>
+
+          @if (detail.recentOccurrences.length === 0) {
+            <p class="stats-card__empty">Aucune occurrence r&eacute;cente sur cette p&eacute;riode.</p>
+          } @else {
+            <ul>
+              @for (item of detail.recentOccurrences; track item.occurrenceDate + item.occurrenceTime) {
+                <li class="stats-detail__history-row">
+                  <div class="stats-detail__history-copy">
+                    <strong>{{ item.occurrenceDate | date: 'dd/MM/yyyy' }}</strong>
+                    <span>{{ item.occurrenceTime }} &middot; {{ dayCategoryLabel(item.dayCategory) }}</span>
+                  </div>
+                  <span class="stats-detail__history-status">{{ statusLabel(item.status) }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      </section>
+    </div>
+  }
+</section>

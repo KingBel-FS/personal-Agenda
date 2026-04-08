@@ -1,0 +1,67 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-add-timezone-name-to-users
+      author: codex
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: timezone_name
+                  type: varchar(100)
+                  defaultValue: Europe/Paris
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 008-create-day-profiles
+      author: codex
+      changes:
+        - createTable:
+            tableName: day_profiles
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: day_category
+                  type: varchar(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: wake_up_time
+                  type: time
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: day_profiles
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_day_profiles_user_id
+        - addUniqueConstraint:
+            tableName: day_profiles
+            columnNames: user_id, day_category
+            constraintName: uq_day_profiles_user_category
+  - changeSet:
+      id: 009-seed-day-profiles-for-existing-users
+      author: codex
+      changes:
+        - sql:
+            sql: |
+              insert into day_profiles (id, user_id, day_category, wake_up_time)
+              select gen_random_uuid(), id, 'WORKDAY', time '07:00:00' from users
+              on conflict (user_id, day_category) do nothing;
+              insert into day_profiles (id, user_id, day_category, wake_up_time)
+              select gen_random_uuid(), id, 'VACATION', time '09:00:00' from users
+              on conflict (user_id, day_category) do nothing;
+              insert into day_profiles (id, user_id, day_category, wake_up_time)
+              select gen_random_uuid(), id, 'WEEKEND_HOLIDAY', time '08:30:00' from users
+              on conflict (user_id, day_category) do nothing;

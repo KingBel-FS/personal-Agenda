@@ -1,0 +1,72 @@
+<main class="register-shell">
+  <section class="hero">
+    <img src="/logo.svg" alt="Personal Habit Tracker" class="app-logo" width="56" height="56" />
+    <p class="eyebrow">Personal Habit Tracker</p>
+    <h1>Crée ton compte et prépare ton rythme réel.</h1>
+    <p class="lede">
+      L'inscription enregistre ton identité, ton consentement, ta zone géographique et ta photo
+      optionnelle.
+    </p>
+  </section>
+
+  <section class="panel" aria-labelledby="register-title">
+    <h2 id="register-title">Inscription</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label>
+        Pseudo
+        <input type="text" formControlName="pseudo" autocomplete="nickname" />
+      </label>
+
+      <label>
+        Email
+        <input type="email" formControlName="email" autocomplete="email" />
+      </label>
+
+      <label>
+        Mot de passe
+        <input type="password" formControlName="password" autocomplete="new-password" />
+      </label>
+
+      <label>
+        Date de naissance
+        <input type="date" formControlName="birthDate" />
+      </label>
+
+      <label>
+        Zone géographique
+        <select formControlName="geographicZone">
+          <option value="METROPOLE">Métropole</option>
+          <option value="ALSACE_LORRAINE">Alsace-Lorraine</option>
+        </select>
+      </label>
+
+      <label>
+        Photo de profil optionnelle
+        <input type="file" accept="image/png,image/jpeg,image/webp" (change)="onPhotoSelected($event)" />
+      </label>
+
+      @if (selectedPhotoName()) {
+        <p class="file-hint">Fichier : {{ selectedPhotoName() }}</p>
+      }
+
+      <label class="consent">
+        <input type="checkbox" formControlName="consentAccepted" />
+        <span>J'accepte la collecte de données selon la version légale en vigueur.</span>
+      </label>
+
+      <button type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Création en cours...' : 'Créer mon compte' }}
+      </button>
+    </form>
+
+    @if (successMessage()) {
+      <p class="success">{{ successMessage() }}</p>
+    }
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+    <p class="file-hint">
+      Déjà activé ? <a href="/login">Va à la connexion</a>
+    </p>
+  </section>
+</main>

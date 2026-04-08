@@ -1,0 +1,90 @@
+databaseChangeLog:
+  - changeSet:
+      id: 018-create-task-occurrences
+      author: gino
+      changes:
+        - createTable:
+            tableName: task_occurrences
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: task_definition_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: task_rule_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: occurrence_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: occurrence_time
+                  type: time
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(20)
+                  defaultValue: planned
+                  constraints:
+                    nullable: false
+              - column:
+                  name: day_category
+                  type: varchar(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: task_occurrences
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_task_occurrences_user_id
+        - addForeignKeyConstraint:
+            baseTableName: task_occurrences
+            baseColumnNames: task_definition_id
+            referencedTableName: task_definitions
+            referencedColumnNames: id
+            constraintName: fk_task_occurrences_task_definition_id
+        - addForeignKeyConstraint:
+            baseTableName: task_occurrences
+            baseColumnNames: task_rule_id
+            referencedTableName: task_rules
+            referencedColumnNames: id
+            constraintName: fk_task_occurrences_task_rule_id
+        - addUniqueConstraint:
+            tableName: task_occurrences
+            columnNames: task_rule_id, occurrence_date
+            constraintName: uq_task_occurrences_rule_date
+        - createIndex:
+            tableName: task_occurrences
+            indexName: idx_task_occurrences_user_date
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: occurrence_date

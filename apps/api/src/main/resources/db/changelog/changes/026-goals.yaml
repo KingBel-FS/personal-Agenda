@@ -1,0 +1,87 @@
+databaseChangeLog:
+  - changeSet:
+      id: 026-create-goals
+      author: codex
+      changes:
+        - createTable:
+            tableName: goals
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: goal_scope
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: period_type
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: target_count
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: task_definition_id
+                  type: uuid
+              - column:
+                  name: active
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: goals
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_goals_user
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: goals
+            baseColumnNames: task_definition_id
+            referencedTableName: task_definitions
+            referencedColumnNames: id
+            constraintName: fk_goals_task_definition
+            onDelete: CASCADE
+
+        - createIndex:
+            tableName: goals
+            indexName: idx_goals_user_period
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: period_type
+
+        - createIndex:
+            tableName: goals
+            indexName: idx_goals_task_definition
+            columns:
+              - column:
+                  name: task_definition_id

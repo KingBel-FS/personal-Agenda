@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 016-occurrence-add-slot-fk
+      author: gino
+      comment: "Story 2.5 — ajout colonne task_time_slot_id (nullable) sur task_occurrences"
+      changes:
+        - addColumn:
+            tableName: task_occurrences
+            columns:
+              - column:
+                  name: task_time_slot_id
+                  type: uuid
+        - addForeignKeyConstraint:
+            baseTableName: task_occurrences
+            baseColumnNames: task_time_slot_id
+            referencedTableName: task_time_slots
+            referencedColumnNames: id
+            constraintName: fk_task_occurrences_task_time_slot_id

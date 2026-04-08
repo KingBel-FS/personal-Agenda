@@ -1,0 +1,43 @@
+{
+  "name": "Personal Habit Tracker",
+  "short_name": "Habit Tracker",
+  "description": "Planifiez vos habitudes selon votre rythme de vie réel.",
+  "lang": "fr",
+  "start_url": "/today",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "categories": ["productivity", "lifestyle"],
+  "scope": "/",
+  "id": "/",
+  "icons": [
+    {
+      "src": "logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nouvelle tâche",
+      "short_name": "Nouvelle tâche",
+      "url": "/tasks/new",
+      "icons": [{ "src": "logo.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Gérer les occurrences",
+      "short_name": "Gérer",
+      "url": "/tasks/manage",
+      "icons": [{ "src": "logo.svg", "sizes": "any" }]
+    }
+  ]
+}

@@ -1,0 +1,391 @@
+<main class="wizard-shell">
+  <section class="hero">
+    <p class="eyebrow">Nouvelle tâche</p>
+    <h1>Créer une tâche</h1>
+  </section>
+
+  <nav class="step-indicator" aria-label="Étapes du formulaire">
+    @for (step of [1, 2, 3, 4, 5]; track step) {
+      <button
+        type="button"
+        class="step-dot"
+        [class.active]="currentStep() === step"
+        [class.done]="currentStep() > step"
+        [attr.aria-current]="currentStep() === step ? 'step' : null"
+        [attr.aria-label]="'Étape ' + step"
+        (click)="currentStep() > step && goToStep(step)"
+        [disabled]="currentStep() <= step"
+      >{{ step }}</button>
+    }
+  </nav>
+
+  @if (errorMessage()) {
+    <div class="error-banner" role="alert">{{ errorMessage() }}</div>
+  }
+
+  <div class="wizard-card">
+    @if (currentStep() === 1) {
+      <app-step-form titleId="step1-title" title="Informations de base" eyebrow="Étape 1" subtitle="Nom, icône et texte d'aide pour reconnaître rapidement la tâche.">
+
+        <form [formGroup]="infoForm" novalidate>
+          <div class="field">
+            <label for="title">Titre <span aria-hidden="true">*</span></label>
+            <input
+              id="title"
+              type="text"
+              formControlName="title"
+              maxlength="100"
+              autocomplete="off"
+              [attr.aria-invalid]="infoControlInvalid('title') || null"
+            />
+            @if (infoControlInvalid('title')) {
+              <p class="field-error" role="alert">Le titre est requis (100 caractères max).</p>
+            }
+          </div>
+
+          <div class="field">
+            <label>Icône <span aria-hidden="true">*</span></label>
+            <div class="icon-picker-row">
+              <button
+                type="button"
+                class="icon-preview"
+                [class.placeholder]="!infoForm.controls.icon.value"
+                (click)="showEmojiPicker.set(!showEmojiPicker())"
+                [attr.aria-expanded]="showEmojiPicker()"
+                aria-label="Choisir une icône emoji"
+              >
+                {{ infoForm.controls.icon.value || '➕' }}
+              </button>
+              @if (infoForm.controls.icon.value) {
+                <span class="icon-selected-hint">{{ infoForm.controls.icon.value }} sélectionnée, clique pour changer</span>
+              } @else {
+                <span class="icon-selected-hint">Clique pour choisir ton emoji</span>
+              }
+            </div>
+            @if (infoControlInvalid('icon')) {
+              <p class="field-error" role="alert">L’icône est requise.</p>
+            }
+            @if (showEmojiPicker()) {
+              <div class="emoji-picker-wrap">
+                <app-emoji-picker (emojiSelected)="onEmojiSelected($event)" />
+              </div>
+            }
+          </div>
+
+          <div class="field">
+            <label for="description">Description <span class="optional">(optionnelle)</span></label>
+            <textarea
+              id="description"
+              formControlName="description"
+              rows="3"
+              placeholder="Décris ta tâche..."
+            ></textarea>
+          </div>
+        </form>
+      </app-step-form>
+    }
+
+    @if (currentStep() === 2) {
+      <app-step-form titleId="step2-title" title="Photo" eyebrow="Étape 2" subtitle="Ajoute une image privée pour personnaliser la tâche si tu en as besoin.">
+
+        <div class="field">
+          <label for="photo" class="file-label">
+            @if (selectedPhotoName()) {
+              <span>{{ selectedPhotoName() }}</span>
+            } @else {
+              <span>Choisir une photo</span>
+            }
+          </label>
+          <input
+            id="photo"
+            type="file"
+            accept="image/*"
+            class="sr-only"
+            (change)="onPhotoSelected($event)"
+          />
+        </div>
+
+        @if (selectedPhotoName()) {
+          <p class="photo-hint">Photo sélectionnée : {{ selectedPhotoName() }}</p>
+        } @else {
+          <p class="photo-hint">Aucune photo sélectionnée. Tu peux passer cette étape.</p>
+        }
+      </app-step-form>
+    }
+
+    @if (currentStep() === 3) {
+      <app-step-form titleId="step3-title" title="Planification" eyebrow="Étape 3" subtitle="Choisis quand la tâche s'applique et si elle doit se répéter.">
+
+        <form [formGroup]="planningForm" novalidate>
+          <fieldset class="field">
+            <legend>Jours concernés <span aria-hidden="true">*</span></legend>
+            @for (cat of dayCategoryKeys; track cat) {
+              <label class="checkbox-label">
+                <input type="checkbox" [formControlName]="cat" />
+                {{ dayCategoryLabels[cat] }}
+              </label>
+            }
+          </fieldset>
+
+          <div class="field">
+            <label for="startDate">Date de début <span aria-hidden="true">*</span></label>
+            <input
+              id="startDate"
+              type="date"
+              formControlName="startDate"
+              [min]="today"
+              [attr.aria-invalid]="planningControlInvalid('startDate') || null"
+            />
+            @if (planningControlInvalid('startDate')) {
+              <p class="field-error" role="alert">La date de début est requise.</p>
+            }
+          </div>
+
+          <fieldset class="field">
+            <legend>Récurrence</legend>
+            <label class="radio-label">
+              <input type="radio" formControlName="recurrenceType" value="NONE" />
+              Ponctuelle
+            </label>
+            <label class="radio-label">
+              <input type="radio" formControlName="recurrenceType" value="WEEKLY" />
+              Hebdomadaire
+            </label>
+            <label class="radio-label">
+              <input type="radio" formControlName="recurrenceType" value="MONTHLY" />
+              Mensuelle
+            </label>
+          </fieldset>
+
+          @if (planningForm.controls.recurrenceType.value === 'WEEKLY') {
+            <fieldset class="field">
+              <legend>Jours de la semaine <span aria-hidden="true">*</span></legend>
+              @for (day of daysOfWeek; track day.value) {
+                <label class="checkbox-label">
+                  <input type="checkbox" [formControlName]="'dow' + day.value" />
+                  {{ day.label }}
+                </label>
+              }
+            </fieldset>
+          }
+
+          @if (planningForm.controls.recurrenceType.value === 'MONTHLY') {
+            <div class="field">
+              <label for="dayOfMonth">Jour du mois <span aria-hidden="true">*</span></label>
+              <input
+                id="dayOfMonth"
+                type="number"
+                formControlName="dayOfMonth"
+                min="1"
+                max="31"
+                step="1"
+              />
+            </div>
+          }
+
+          @if (planningForm.controls.recurrenceType.value !== 'NONE') {
+            <div class="field">
+              <label for="endDate">Date de fin <span class="optional">(optionnelle)</span></label>
+              <input
+                id="endDate"
+                type="date"
+                formControlName="endDate"
+                [min]="planningForm.controls.startDate.value || today"
+              />
+            </div>
+          }
+
+          <div class="field">
+            <label for="endTime">Heure de fin des repetitions <span class="optional">(optionnelle)</span></label>
+            <input
+              id="endTime"
+              type="time"
+              formControlName="endTime"
+            />
+            <p class="field-hint">Les repetitions intra-journalieres s'arretent a cette heure (par defaut : minuit).</p>
+          </div>
+        </form>
+      </app-step-form>
+    }
+
+    @if (currentStep() === 4) {
+      <app-step-form titleId="step4-title" title="Horaire" eyebrow="Étape 4" subtitle="Définis l'heure ou le décalage après le réveil, puis les répétitions éventuelles.">
+
+        <form [formGroup]="scheduleForm" novalidate>
+          <fieldset class="field">
+            <legend>Mode horaire <span aria-hidden="true">*</span></legend>
+            <label class="radio-label">
+              <input type="radio" formControlName="timeMode" value="FIXED" />
+              Heure fixe
+            </label>
+            <label class="radio-label">
+              <input type="radio" formControlName="timeMode" value="WAKE_UP_OFFSET" />
+              Décalage depuis le réveil
+            </label>
+          </fieldset>
+
+          @if (scheduleForm.controls.timeMode.value === 'FIXED') {
+            <div class="field">
+              <label for="fixedTime">Heure <span aria-hidden="true">*</span></label>
+              <input
+                id="fixedTime"
+                type="time"
+                formControlName="fixedTime"
+              />
+            </div>
+          }
+
+          @if (scheduleForm.controls.timeMode.value === 'WAKE_UP_OFFSET') {
+            <div class="field">
+              <p class="field-hint">Décalage depuis l’heure de réveil (positif = après, négatif = avant).</p>
+              <div class="offset-row">
+                <div class="offset-field">
+                  <label for="wakeUpOffsetHours">Heures</label>
+                  <input
+                    id="wakeUpOffsetHours"
+                    type="number"
+                    formControlName="wakeUpOffsetHours"
+                    min="-8"
+                    max="8"
+                    step="1"
+                  />
+                </div>
+                <div class="offset-field">
+                  <label for="wakeUpOffsetMins">Minutes</label>
+                  <input
+                    id="wakeUpOffsetMins"
+                    type="number"
+                    formControlName="wakeUpOffsetMins"
+                    min="0"
+                    max="55"
+                    step="5"
+                  />
+                </div>
+              </div>
+            </div>
+          }
+        </form>
+
+        <section class="slots-section" aria-labelledby="slots-title">
+          <h3 id="slots-title">Répétitions dans la journée <span class="optional-badge">(optionnel)</span></h3>
+          <p class="slots-hint">
+            Le 1er créneau est défini par l'horaire principal ci-dessus. Ajoute ici des répétitions supplémentaires.
+            La dernière répétition ne sera jamais planifiée après minuit.
+          </p>
+
+          @for (slotCtrl of slots.controls; track $index) {
+            <div class="slot-card" [formGroup]="$any(slotCtrl)">
+              <div class="slot-header">
+                <span class="slot-label">Répétition {{ $index + 1 }}</span>
+                <button type="button" class="btn-remove-slot" (click)="removeTimeSlot($index)" aria-label="Supprimer cette répétition">✕</button>
+              </div>
+
+              <fieldset class="field">
+                <legend>Mode</legend>
+                <label class="radio-label">
+                  <input type="radio" formControlName="timeMode" value="EVERY_N_MINUTES" />
+                  Toutes les X h Y min
+                </label>
+                <label class="radio-label">
+                  <input type="radio" formControlName="timeMode" value="FIXED" />
+                  Heure fixe
+                </label>
+              </fieldset>
+
+              @if ($any(slotCtrl).controls.timeMode.value === 'EVERY_N_MINUTES') {
+                <div class="field">
+                  <label>Intervalle</label>
+                  <div class="offset-row">
+                    <input type="number" formControlName="intervalHours" min="0" max="12" step="1" aria-label="Heures" />
+                    <span>h</span>
+                    <input type="number" formControlName="intervalMins" min="0" max="55" step="5" aria-label="Minutes" />
+                    <span>min</span>
+                  </div>
+                  <p class="field-hint">{{ slotScheduleSummary($any(slotCtrl)) }}</p>
+                </div>
+              }
+              @if ($any(slotCtrl).controls.timeMode.value === 'FIXED') {
+                <div class="field">
+                  <label>Heure</label>
+                  <input type="time" formControlName="fixedTime" />
+                </div>
+              }
+            </div>
+          }
+
+          <button type="button" class="btn-add-slot" (click)="addTimeSlot()">+ Ajouter une répétition</button>
+        </section>
+      </app-step-form>
+    }
+
+    @if (currentStep() === 5) {
+      <app-step-form titleId="step5-title" title="Aperçu et confirmation" eyebrow="Étape 5" subtitle="Vérifie le résumé avant de créer la tâche.">
+
+        @if (previewing()) {
+          <p class="loading-hint">Calcul de la prochaine occurrence...</p>
+        }
+
+        @if (preview(); as p) {
+          <div class="preview-card" role="status">
+            <p class="preview-label">Prochaine occurrence</p>
+            <p class="preview-value">{{ p.occurrenceLabel }}</p>
+          </div>
+
+          <dl class="summary">
+            <dt>Tâche</dt>
+            <dd>{{ infoForm.controls.title.value }} {{ infoForm.controls.icon.value }}</dd>
+            <dt>Date de début</dt>
+            <dd>{{ planningForm.controls.startDate.value }}</dd>
+            <dt>Jours concernés</dt>
+            <dd>{{ selectedCategoryLabels() }}</dd>
+            <dt>Récurrence</dt>
+            <dd>{{ recurrenceSummary() }}</dd>
+            @if (planningForm.controls.recurrenceType.value !== 'NONE' && planningForm.controls.endDate.value) {
+              <dt>Date de fin</dt>
+              <dd>{{ planningForm.controls.endDate.value }}</dd>
+            }
+            @if (planningForm.controls.endTime.value) {
+              <dt>Fin des repetitions</dt>
+              <dd>{{ planningForm.controls.endTime.value }}</dd>
+            }
+            <dt>Mode horaire</dt>
+            <dd>{{ scheduleForm.controls.timeMode.value === 'FIXED' ? 'Heure fixe : ' + scheduleForm.controls.fixedTime.value : 'Décalage réveil : ' + scheduleForm.controls.wakeUpOffsetHours.value + 'h' + scheduleForm.controls.wakeUpOffsetMins.value + 'min' }}</dd>
+          </dl>
+        }
+      </app-step-form>
+    }
+
+    <div class="wizard-nav">
+      @if (currentStep() > 1) {
+        <button type="button" class="btn-secondary" (click)="prevStep()" [disabled]="submitting() || previewing()">
+          Précédent
+        </button>
+      } @else {
+        <a routerLink="/profile" class="btn-secondary">Annuler</a>
+      }
+
+      @if (currentStep() < 4) {
+        <button type="button" class="btn-primary" (click)="nextStep()">
+          Suivant
+        </button>
+      }
+
+      @if (currentStep() === 4) {
+        <button type="button" class="btn-primary" (click)="nextStep()" [disabled]="previewing()">
+          @if (previewing()) { Calcul... } @else { Aperçu }
+        </button>
+      }
+
+      @if (currentStep() === 5) {
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="submit()"
+          [disabled]="submitting() || !preview()"
+        >
+          @if (submitting()) { Création... } @else { Créer la tâche }
+        </button>
+      }
+    </div>
+  </div>
+</main>

@@ -1,0 +1,67 @@
+/* ── Activate page — centered panel ─────────────────────────────── */
+:host { display: contents; }
+
+.activate-shell {
+  min-height: 100dvh;
+  background: var(--bg);
+  display: grid;
+  place-items: center;
+  padding: var(--sp-8) var(--sp-4);
+}
+
+.panel {
+  width: min(100%, 480px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: var(--sp-8) var(--sp-6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow);
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .10em;
+  color: var(--brand);
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+
+  a {
+    color: var(--brand);
+    font-size: .875rem;
+    font-weight: 500;
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+    &:focus-visible { outline: 3px solid var(--brand-ring); border-radius: var(--r-xs); }
+  }
+}
+
+.success {
+  color: var(--success);
+  font-size: .875rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.error {
+  color: var(--danger);
+  font-size: .875rem;
+  font-weight: 600;
+  margin: 0;
+}

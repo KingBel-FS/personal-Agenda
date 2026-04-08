@@ -1,0 +1,95 @@
+<section class="exports-page">
+  <header class="exports-hero">
+    <div>
+      <p class="exports-hero__eyebrow">Récupération des données</p>
+      <h1>Exports</h1>
+      <p class="exports-hero__lead">
+        Télécharge tes tâches, ton historique ou un export complet au format CSV ou PDF.
+      </p>
+    </div>
+  </header>
+
+  @if (errorMessage()) {
+    <p class="exports-feedback exports-feedback--error" role="alert">{{ errorMessage() }}</p>
+  }
+
+  @if (successMessage()) {
+    <p class="exports-feedback exports-feedback--success" role="status">{{ successMessage() }}</p>
+  }
+
+  <section class="exports-layout">
+    <article class="exports-card">
+      <div class="exports-card__head">
+        <div>
+          <p class="exports-card__eyebrow">Demande</p>
+          <h2>Nouvel export</h2>
+        </div>
+      </div>
+
+      <form class="exports-form" [formGroup]="form" (ngSubmit)="submit()">
+        <label class="exports-field">
+          <span>Format</span>
+          <select formControlName="format">
+            <option value="EXCEL">Excel (.xlsx)</option>
+            <option value="PDF">PDF (.pdf)</option>
+          </select>
+        </label>
+
+        <label class="exports-field">
+          <span>Scope</span>
+          <select formControlName="scope">
+            <option value="FULL">Complet</option>
+            <option value="TASKS">Tâches</option>
+            <option value="HISTORY">Historique</option>
+          </select>
+        </label>
+
+        <div class="exports-grid">
+          <label class="exports-field">
+            <span>Depuis</span>
+            <input type="date" formControlName="fromDate" />
+          </label>
+
+          <label class="exports-field">
+            <span>Jusqu'à</span>
+            <input type="date" formControlName="toDate" />
+          </label>
+        </div>
+
+        <button type="submit" class="exports-submit" [disabled]="downloading()">
+          {{ downloading() ? 'Génération...' : 'Télécharger' }}
+        </button>
+      </form>
+    </article>
+
+    <article class="exports-card">
+      <div class="exports-card__head">
+        <div>
+          <p class="exports-card__eyebrow">Traçabilité</p>
+          <h2>Historique récent</h2>
+        </div>
+      </div>
+
+      @if (loading()) {
+        <p class="exports-empty">Chargement des exports...</p>
+      } @else if (history().length === 0) {
+        <p class="exports-empty">Aucun export généré pour le moment.</p>
+      } @else {
+        <ul class="exports-history">
+          @for (item of history(); track item.id) {
+            <li class="exports-history__item">
+              <div>
+                <strong>{{ formatLabel(item.exportFormat) }} · {{ scopeLabel(item.exportScope) }}</strong>
+                <span>{{ item.periodFrom || 'Début compte' }} → {{ item.periodTo || 'Aujourd\'hui' }}</span>
+              </div>
+              <div class="exports-history__meta">
+                <span>{{ statusLabel(item.status) }}</span>
+                <small>{{ item.createdAt | date: 'dd/MM/yyyy HH:mm' }}</small>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </article>
+  </section>
+</section>

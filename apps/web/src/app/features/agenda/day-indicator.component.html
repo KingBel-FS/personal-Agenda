@@ -1,0 +1,18 @@
+<button
+  type="button"
+  [id]="buttonId()"
+  class="day-indicator day-indicator--{{ day().statusTone }}"
+  [class.day-indicator--selected]="selected()"
+  [class.day-indicator--outside]="!day().currentMonth"
+  [class.day-indicator--locked]="day().beforeAccountCreation"
+  [attr.aria-pressed]="selected()"
+  [disabled]="day().beforeAccountCreation"
+  [attr.aria-label]="ariaLabel()"
+  (click)="onActivate()"
+  (keydown)="onNavigate($event)"
+>
+  <span class="day-indicator__date">{{ day().date.slice(8, 10) }}</span>
+  <span class="day-indicator__meta">
+    <span class="day-indicator__count">{{ day().totalCount }}</span>
+  </span>
+</button>

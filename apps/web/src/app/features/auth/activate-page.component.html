@@ -1,0 +1,21 @@
+<main class="activate-shell">
+  <section class="panel">
+    <p class="eyebrow">Activation</p>
+    <h1>Activation du compte</h1>
+
+    @if (loading()) {
+      <p>Activation en cours...</p>
+    }
+    @if (successMessage()) {
+      <p class="success">{{ successMessage() }}</p>
+    }
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <nav class="links" aria-label="Liens activation">
+      <a routerLink="/login">Aller à la connexion</a>
+      <a routerLink="/register">Retour à l'inscription</a>
+    </nav>
+  </section>
+</main>

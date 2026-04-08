@@ -1,0 +1,291 @@
+databaseChangeLog:
+  - changeSet:
+      id: 031-create-fl-device
+      author: dev
+      changes:
+        - createTable:
+            tableName: fl_device
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: device_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: pairing_token
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+                    unique: true
+              - column:
+                  name: pairing_token_expires_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: true
+              - column:
+                  name: status
+                  type: varchar(20)
+                  defaultValue: PENDING
+                  constraints:
+                    nullable: false
+              - column:
+                  name: family_controls_granted
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: screen_time_granted
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: notifications_granted
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: paired_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: true
+              - column:
+                  name: last_seen_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: true
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 031-create-fl-rule
+      author: dev
+      changes:
+        - createTable:
+            tableName: fl_rule
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: target_type
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: target_identifier
+                  type: varchar(500)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rule_type
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: limit_minutes
+                  type: integer
+                  constraints:
+                    nullable: true
+              - column:
+                  name: friction_type
+                  type: varchar(20)
+                  defaultValue: NONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: active
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 031-create-fl-schedule
+      author: dev
+      changes:
+        - createTable:
+            tableName: fl_schedule
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: rule_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_fl_schedule_rule
+                    references: fl_rule(id)
+                    deleteCascade: true
+              - column:
+                  name: start_time
+                  type: time
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_time
+                  type: time
+                  constraints:
+                    nullable: false
+              - column:
+                  name: days_of_week
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 031-create-fl-web-domain
+      author: dev
+      changes:
+        - createTable:
+            tableName: fl_web_domain
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: rule_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_fl_web_domain_rule
+                    references: fl_rule(id)
+                    deleteCascade: true
+              - column:
+                  name: domain
+                  type: varchar(500)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 031-create-fl-usage-event
+      author: dev
+      changes:
+        - createTable:
+            tableName: fl_usage_event
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: device_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: target_identifier
+                  type: varchar(500)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: consumed_minutes
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: event_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: fl_usage_event
+            columnNames: user_id, device_id, target_identifier, event_date
+            constraintName: uq_fl_usage_event
+
+  - changeSet:
+      id: 031-create-fl-override-event
+      author: dev
+      changes:
+        - createTable:
+            tableName: fl_override_event
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: rule_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: friction_applied
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: overridden_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false

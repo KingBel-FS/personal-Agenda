@@ -1,0 +1,288 @@
+<nav class="sidebar" role="navigation" aria-label="Navigation principale">
+  <div class="sidebar-brand">
+    <a routerLink="/today" class="brand-link" aria-label="Habit Tracker page d'accueil">
+      <img src="/logo.svg" alt="" width="36" height="36" class="brand-logo" aria-hidden="true">
+      <div class="brand-text">
+        <span class="brand-name">Habit Tracker</span>
+        <span class="brand-sub">Personal</span>
+      </div>
+    </a>
+
+    <section class="streak-panel" aria-label="Streak actuelle">
+      <app-streak-flame
+        [current]="streak()?.currentStreak ?? 0"
+        [best]="streak()?.longestStreak ?? 0"
+        [active]="streak()?.streakActive ?? false"
+        label="Série en cours"
+        variant="nav"
+      />
+    </section>
+  </div>
+
+  <ul class="nav-list" role="list">
+    <li>
+      <a routerLink="/today" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span>Aujourd'hui</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/daily" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 7v5l3 3"/>
+        </svg>
+        <span>Vue journalière</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/agenda" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <span>Agenda</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/goals" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M12 20V10"/>
+          <path d="M18 20V4"/>
+          <path d="M6 20v-4"/>
+        </svg>
+        <span>Objectifs</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/stats" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M3 3v18h18"/>
+          <path d="M7 14l3-3 3 2 4-6"/>
+        </svg>
+        <span>Statistiques</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/exports" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span>Exports</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/tasks/new" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="16"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        <span>Nouvelle tâche</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/tasks/manage" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <line x1="8" y1="6" x2="21" y2="6"/>
+          <line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/>
+          <line x1="3" y1="12" x2="3.01" y2="12"/>
+          <line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+        <span>Gérer les tâches</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/notifications" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span>Notifications</span>
+      </a>
+    </li>
+    <li class="nav-section-label" aria-hidden="true">FocusLock</li>
+    <li>
+      <a routerLink="/focuslock" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/focuslock/rules" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <line x1="8" y1="6" x2="21" y2="6"/>
+          <line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/>
+          <line x1="3" y1="12" x2="3.01" y2="12"/>
+          <line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+        <span>Règles</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/focuslock/insights" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M3 3v18h18"/>
+          <path d="M7 14l3-3 3 2 4-6"/>
+        </svg>
+        <span>Insights</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/focuslock/device" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+          <line x1="12" y1="18" x2="12.01" y2="18"/>
+        </svg>
+        <span>État iPhone</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/profile" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        <span>Mon profil</span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <button
+      type="button"
+      class="theme-btn"
+      (click)="toggleTheme()"
+      [attr.aria-label]="darkMode() ? 'Passer en mode clair' : 'Passer en mode sombre'"
+      [attr.aria-pressed]="darkMode()"
+    >
+      @if (darkMode()) {
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <span>Mode clair</span>
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <span>Mode sombre</span>
+      }
+    </button>
+    <button type="button" class="theme-btn logout-btn" (click)="logout()" [disabled]="loggingOut()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      <span>{{ loggingOut() ? 'Déconnexion...' : 'Se déconnecter' }}</span>
+    </button>
+  </div>
+</nav>
+
+<main id="main-content" class="shell-content" tabindex="-1">
+  <app-notification-banner />
+
+  <section class="mobile-topbar" aria-label="Barre de navigation mobile">
+    <button
+      type="button"
+      class="mobile-menu-btn"
+      (click)="toggleMobileMenu()"
+      [attr.aria-expanded]="mobileNavOpen()"
+      aria-label="Ouvrir le menu"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+      <span>Menu</span>
+    </button>
+
+    <section class="mobile-streak" aria-label="Streak actuelle">
+      <app-streak-flame
+        [current]="streak()?.currentStreak ?? 0"
+        [best]="streak()?.longestStreak ?? 0"
+        [active]="streak()?.streakActive ?? false"
+        label="Série"
+        variant="mobile"
+      />
+    </section>
+  </section>
+
+  <router-outlet />
+</main>
+
+@if (mobileNavOpen()) {
+  <div class="mobile-menu-backdrop" (click)="closeMobileMenu()"></div>
+  <section class="mobile-menu-sheet" aria-modal="true" role="dialog" aria-label="Menu mobile">
+    <div class="mobile-menu-sheet__header">
+      <div>
+        <p class="mobile-menu-sheet__eyebrow">Navigation</p>
+        <h2>Tout le menu</h2>
+      </div>
+      <button type="button" class="mobile-menu-sheet__close" (click)="closeMobileMenu()" aria-label="Fermer le menu">×</button>
+    </div>
+
+    <div class="mobile-menu-links">
+      <a routerLink="/today" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">Aujourd'hui</a>
+      <a routerLink="/daily" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">Vue journalière</a>
+      <a routerLink="/agenda" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">Agenda</a>
+      <a routerLink="/goals" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">Objectifs</a>
+      <a routerLink="/stats" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">Statistiques</a>
+      <a routerLink="/exports" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">Exports</a>
+      <a routerLink="/tasks/new" routerLinkActive="active" class="mobile-menu-link mobile-menu-link--primary" (click)="closeMobileMenu()">Nouvelle tâche</a>
+      <a routerLink="/tasks/manage" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">Gérer les tâches</a>
+      <a routerLink="/notifications" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">Notifications</a>
+      <p class="mobile-menu-section-label">FocusLock</p>
+      <a routerLink="/focuslock" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="mobile-menu-link" (click)="closeMobileMenu()">Dashboard</a>
+      <a routerLink="/focuslock/rules" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">Règles</a>
+      <a routerLink="/focuslock/insights" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">Insights</a>
+      <a routerLink="/focuslock/device" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">État iPhone</a>
+      <a routerLink="/profile" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">Mon profil</a>
+    </div>
+
+    <div class="mobile-menu-actions">
+      <button type="button" class="mobile-menu-action" (click)="toggleTheme()">
+        {{ darkMode() ? 'Passer en mode clair' : 'Passer en mode sombre' }}
+      </button>
+      <button type="button" class="mobile-menu-action mobile-menu-action--danger" (click)="logout()" [disabled]="loggingOut()">
+        {{ loggingOut() ? 'Déconnexion...' : 'Se déconnecter' }}
+      </button>
+    </div>
+  </section>
+}
+
+@if (celebrationBadge(); as badge) {
+  <div class="shell-celebration-backdrop" (click)="dismissCelebration()"></div>
+  <section class="shell-celebration" role="alertdialog" aria-modal="true" aria-labelledby="shell-celebration-title">
+    <div class="shell-celebration__badge" aria-hidden="true">🏅</div>
+    <div class="shell-celebration__copy">
+      <p class="shell-celebration__eyebrow">Palier atteint</p>
+      <h2 id="shell-celebration-title">Série validée : {{ badgeLabel(badge) }}</h2>
+      <p>Le badge est enregistré. Tu peux continuer.</p>
+    </div>
+    <button type="button" class="shell-celebration__close" (click)="dismissCelebration()">Fermer</button>
+  </section>
+}

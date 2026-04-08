@@ -1,0 +1,20 @@
+habit-tracker.fr {
+    # HTTPS automatique via Let's Encrypt
+
+    # SSE endpoint — pas de buffering
+    handle /api/v1/sync/* {
+        reverse_proxy api:8080 {
+            flush_interval -1
+        }
+    }
+
+    # API
+    handle /api/* {
+        reverse_proxy api:8080
+    }
+
+    # Frontend Angular
+    handle {
+        reverse_proxy web:80
+    }
+}

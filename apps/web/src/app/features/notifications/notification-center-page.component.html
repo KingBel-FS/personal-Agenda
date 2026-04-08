@@ -1,0 +1,68 @@
+<div class="notif-page">
+  <header class="notif-header">
+    <h1>Centre de notifications</h1>
+    @if (totalCount() > 0) {
+      <p class="notif-count">{{ totalCount() }} notification{{ totalCount() > 1 ? 's' : '' }}</p>
+    }
+  </header>
+
+  @if (errorMessage()) {
+    <div class="state-error" role="alert">
+      <p>{{ errorMessage() }}</p>
+    </div>
+  }
+
+  @if (!loading() && notifications().length === 0 && !errorMessage()) {
+    <div class="empty-state">
+      <span class="empty-state__icon" aria-hidden="true">🔔</span>
+      <p class="empty-state__text">Aucune notification pour le moment.</p>
+    </div>
+  }
+
+  @if (notifications().length > 0) {
+    <ul class="notif-list" aria-label="Notifications">
+      @for (notif of notifications(); track notif.id) {
+        <li
+          class="notif-card"
+          [class.notif-card--unread]="notif.status === 'RECEIVED'"
+          role="button"
+          tabindex="0"
+          [attr.aria-label]="notificationAriaLabel(notif)"
+          (click)="openNotification(notif)"
+          (keydown)="onNotificationKeydown($event, notif)"
+        >
+          <div class="notif-card__icon">
+            {{ notif.iconUrl ? '' : '🔔' }}
+          </div>
+          <div class="notif-card__body">
+            <span class="notif-card__title">{{ notif.title }}</span>
+            @if (notif.body) {
+              <span class="notif-card__text">{{ notif.body }}</span>
+            }
+            <div class="notif-card__meta">
+              <span class="notif-card__type">{{ typeLabel(notif.notificationType) }}</span>
+              <span class="notif-card__time">{{ relativeTime(notif.createdAt) }}</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="notif-card__dismiss"
+            (click)="dismissNotification(notif); $event.stopPropagation()"
+            (keydown.enter)="dismissNotification(notif); $event.stopPropagation()"
+            aria-label="Supprimer cette notification"
+          >×</button>
+        </li>
+      }
+    </ul>
+
+    @if (hasMore() && !loading()) {
+      <button type="button" class="load-more-btn" (click)="loadMore()">
+        Charger plus
+      </button>
+    }
+  }
+
+  @if (loading()) {
+    <p class="loading-text">Chargement...</p>
+  }
+</div>

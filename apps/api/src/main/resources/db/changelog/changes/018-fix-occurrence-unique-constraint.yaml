@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 018-fix-occurrence-unique-constraint
+      author: gino
+      comment: "Story 2.5 — remplace la contrainte unique (rule_id, date) par deux index partiels pour supporter le multi-slot"
+      changes:
+        - sql:
+            sql: >
+              ALTER TABLE task_occurrences
+                DROP CONSTRAINT IF EXISTS uq_task_occurrences_rule_date;
+
+              CREATE UNIQUE INDEX IF NOT EXISTS uq_occurrence_base
+                ON task_occurrences (task_rule_id, occurrence_date)
+                WHERE task_time_slot_id IS NULL;
+
+              CREATE UNIQUE INDEX IF NOT EXISTS uq_occurrence_slot
+                ON task_occurrences (task_rule_id, occurrence_date, task_time_slot_id)
+                WHERE task_time_slot_id IS NOT NULL;

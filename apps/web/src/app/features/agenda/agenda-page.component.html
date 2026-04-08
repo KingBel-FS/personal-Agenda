@@ -1,0 +1,294 @@
+@if (toastMessage()) {
+  <aside class="toast toast--{{ toastType() }}" role="status">
+    <p class="toast__text">{{ toastMessage() }}</p>
+    <button type="button" class="toast__close" (click)="dismissToast()" aria-label="Fermer">x</button>
+  </aside>
+}
+
+@if (loading()) {
+  <div class="agenda-page" aria-busy="true">
+    <div class="agenda-page__skeleton"></div>
+    <div class="agenda-page__skeleton agenda-page__skeleton--grid"></div>
+  </div>
+}
+
+@if (!loading() && errorMessage()) {
+  <section class="agenda-page">
+    <div class="state-card state-card--error" role="alert">{{ errorMessage() }}</div>
+  </section>
+}
+
+@if (!loading() && !errorMessage() && range(); as currentRange) {
+  <section class="agenda-page">
+    <header class="agenda-hero">
+      <div>
+        <p class="agenda-hero__eyebrow">Agenda vivant</p>
+        <h1>Vue {{ viewMode() === 'week' ? 'semaine' : 'mois' }}</h1>
+        <p class="agenda-hero__summary">{{ rangeLabel() }}</p>
+      </div>
+
+      <div class="agenda-hero__controls">
+        <div class="view-switch" role="tablist" aria-label="Choisir la granularite de l'agenda">
+          <button
+            type="button"
+            class="view-switch__btn"
+            [class.view-switch__btn--active]="viewMode() === 'week'"
+            [attr.aria-selected]="viewMode() === 'week'"
+            (click)="setViewMode('week')"
+          >
+            Semaine
+          </button>
+          <button
+            type="button"
+            class="view-switch__btn"
+            [class.view-switch__btn--active]="viewMode() === 'month'"
+            [attr.aria-selected]="viewMode() === 'month'"
+            (click)="setViewMode('month')"
+          >
+            Mois
+          </button>
+        </div>
+
+        <div class="agenda-nav" aria-label="Navigation agenda">
+          <button type="button" class="agenda-nav__btn" (click)="previousRange()" [attr.aria-label]="viewMode() === 'week' ? 'Afficher la semaine précédente' : 'Afficher le mois précédent'">
+            {{ viewMode() === 'week' ? 'Semaine precedente' : 'Mois precedent' }}
+          </button>
+          <button type="button" class="agenda-nav__btn" (click)="nextRange()" [attr.aria-label]="viewMode() === 'week' ? 'Afficher la semaine suivante' : 'Afficher le mois suivant'">
+            {{ viewMode() === 'week' ? 'Semaine suivante' : 'Mois suivant' }}
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="agenda-layout">
+      <section class="agenda-board" aria-label="Calendrier">
+        <div class="agenda-board__weekdays" aria-hidden="true">
+          @for (label of ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']; track label) {
+            <span>{{ label }}</span>
+          }
+        </div>
+
+        @for (week of weeks(); track $index) {
+          <div class="agenda-board__week" role="row">
+            @for (day of week; track day.date) {
+              <div role="gridcell">
+                <app-day-indicator
+                  [day]="day"
+                  [buttonId]="dayButtonId(day.date)"
+                  [ariaLabel]="dayAriaLabel(day)"
+                  [selected]="isSelected(day)"
+                  (activate)="selectDay(day)"
+                  (navigate)="onDayKeydown($event, day)"
+                />
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <aside class="agenda-detail" aria-live="polite">
+        @if (selectedDaySummary(); as selectedDay) {
+          <header class="agenda-detail__header">
+            <div>
+              <p class="agenda-detail__eyebrow">{{ dayCategoryLabel(selectedDay.dayCategory) }}</p>
+              <h2>{{ dayAriaLabel(selectedDay).split('.')[0] }}</h2>
+            </div>
+          </header>
+
+          @if (!selectedDay.beforeAccountCreation) {
+            <div class="agenda-detail__stats">
+              <span>{{ selectedDay.totalCount }} prevues</span>
+              <span>{{ selectedDay.doneCount }} faites</span>
+              <span>{{ selectedDay.missedCount }} manquees</span>
+            </div>
+          }
+
+          @if (selectedDay.beforeAccountCreation) {
+            <div class="state-card">
+              {{ unavailableMessage() }}
+            </div>
+          } @else if (selectedDay.past) {
+            <div class="state-card state-card--readonly">
+              {{ readonlyMessage() }}
+            </div>
+          }
+
+          @if (selectedDay.beforeAccountCreation) {
+          } @else if (detailLoading()) {
+            <div class="state-card">Chargement des occurrences...</div>
+          } @else if (detailErrorMessage()) {
+            <div class="state-card state-card--error">{{ detailErrorMessage() }}</div>
+          } @else if (detail(); as dayDetail) {
+            @if (dayDetail.occurrences.length === 0) {
+              <div class="state-card">Aucune occurrence sur cette journee.</div>
+            } @else {
+              <ul class="agenda-detail__list" aria-label="Occurrences de la journee">
+                @for (occ of dayDetail.occurrences; track occ.id) {
+                  <li
+                    class="agenda-detail__item"
+                    [class.agenda-detail__item--busy]="busy()"
+                    role="button"
+                    tabindex="0"
+                    [attr.aria-label]="occurrenceAriaLabel(occ)"
+                    (pointerdown)="onOccurrencePointerDown(occ)"
+                    (pointerup)="onOccurrencePointerUp(occ)"
+                    (pointerleave)="onOccurrencePointerLeave()"
+                    (keydown.enter)="onOccurrencePointerUp(occ)"
+                    (keydown.space)="onOccurrencePointerUp(occ); $event.preventDefault()"
+                    (contextmenu)="$event.preventDefault()"
+                  >
+                    <span class="agenda-detail__icon" aria-hidden="true">{{ occ.icon }}</span>
+                    <div class="agenda-detail__content">
+                      <span class="agenda-detail__title">{{ occ.title }}</span>
+                      @if (occ.description) {
+                        <span class="agenda-detail__description">{{ occ.description }}</span>
+                      }
+                    </div>
+                    <div class="agenda-detail__meta">
+                      <time>{{ occ.occurrenceTime }}</time>
+                      <span>{{ detailStatusLabel(occ.status) }}</span>
+                    </div>
+                  </li>
+                }
+              </ul>
+            }
+          }
+
+          @if (!selectedDay.beforeAccountCreation) {
+            <button type="button" class="agenda-detail__open agenda-detail__open--secondary" (click)="createTaskForSelectedDay()">
+              Creer une tache
+            </button>
+            <button type="button" class="agenda-detail__open agenda-detail__open--bottom" (click)="openSelectedDay()">
+              Ouvrir la journee
+            </button>
+          }
+        }
+      </aside>
+    </div>
+  </section>
+}
+
+@if (contextMenuOpen() && contextTarget(); as occ) {
+  <div class="sheet-backdrop" (click)="closeContextMenu()"></div>
+  <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="agenda-context-title">
+    <h2 id="agenda-context-title" class="sheet__title">{{ occ.icon }} {{ occ.title }}</h2>
+    <p class="sheet__subtitle">{{ occ.occurrenceTime }} · {{ detailStatusLabel(occ.status) }}</p>
+
+    <div class="sheet__actions">
+      @if (occ.status !== 'done') {
+        <button type="button" class="sheet__btn sheet__btn--done" (click)="contextAction('done')">Marquer terminee</button>
+      }
+      @if (occ.status !== 'missed') {
+        <button type="button" class="sheet__btn sheet__btn--missed" (click)="contextAction('missed')">Marquer manquee</button>
+      }
+      @if (occ.status === 'done' || occ.status === 'missed') {
+        <button type="button" class="sheet__btn sheet__btn--edit" (click)="contextAction('revert')">Remettre a faire</button>
+      }
+      <button type="button" class="sheet__btn sheet__btn--edit" (click)="contextAction('edit-time')">Modifier l'heure</button>
+      @if (!selectedDaySummary()?.past) {
+        <button type="button" class="sheet__btn sheet__btn--edit" (click)="openManageEditor(occ, 'THIS_OCCURRENCE')">Modifier cette occurrence</button>
+        @if (occ.recurring) {
+          <button type="button" class="sheet__btn sheet__btn--edit" (click)="openManageEditor(occ, 'THIS_AND_FOLLOWING')">Modifier la serie</button>
+        }
+      }
+      @if (!occ.recurring && occ.status === 'planned') {
+        <button type="button" class="sheet__btn sheet__btn--edit" (click)="contextAction('reschedule')">Decaler</button>
+      }
+      @if (!selectedDaySummary()?.past) {
+        <button type="button" class="sheet__btn sheet__btn--delete" (click)="contextAction('delete')">Supprimer l'occurrence</button>
+      }
+      <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeContextMenu()">Annuler (Échap)</button>
+    </div>
+  </section>
+}
+
+@if (detailSheetOpen() && detailTarget(); as occ) {
+  <div class="sheet-backdrop" (click)="closeDetailSheet()"></div>
+  <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="agenda-detail-title">
+    <div class="detail-header">
+      <span class="detail-icon">{{ occ.icon }}</span>
+      <div>
+        <h2 id="agenda-detail-title" class="sheet__title">{{ occ.title }}</h2>
+        <p class="sheet__subtitle">{{ occ.occurrenceTime }} · {{ detailStatusLabel(occ.status) }}</p>
+      </div>
+    </div>
+    @if (occ.description) {
+      <p class="detail-description">{{ occ.description }}</p>
+    } @else {
+      <p class="detail-empty">Aucune description.</p>
+    }
+    @if (occ.status === 'planned') {
+      <div class="sheet__actions">
+        <button type="button" class="sheet__btn sheet__btn--done" (click)="detailAction('done')">Marquer terminee</button>
+        <button type="button" class="sheet__btn sheet__btn--edit" (click)="editTimeFromDetail()">Modifier l'heure</button>
+        @if (!occ.recurring) {
+          <button type="button" class="sheet__btn sheet__btn--edit" (click)="rescheduleFromDetail()">Decaler</button>
+        }
+        <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeDetailSheet()">Fermer (Échap)</button>
+      </div>
+    } @else if (occ.status === 'done' || occ.status === 'missed') {
+      <div class="sheet__actions">
+        <button type="button" class="sheet__btn sheet__btn--edit" (click)="editTimeFromDetail()">Modifier l'heure</button>
+        <button type="button" class="sheet__btn sheet__btn--edit" (click)="detailAction('revert')">Remettre a faire</button>
+        <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeDetailSheet()">Fermer (Échap)</button>
+      </div>
+    } @else {
+      <div class="sheet__actions">
+        <button type="button" class="sheet__btn sheet__btn--edit" (click)="editTimeFromDetail()">Modifier l'heure</button>
+        <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeDetailSheet()">Fermer (Échap)</button>
+      </div>
+    }
+  </section>
+}
+
+@if (editTimeSheetOpen() && editTimeTarget(); as occ) {
+  <div class="sheet-backdrop" (click)="closeEditTimeSheet()"></div>
+  <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="agenda-time-title">
+    <h2 id="agenda-time-title" class="sheet__title">Modifier l'heure</h2>
+    <p class="sheet__subtitle">{{ occ.icon }} {{ occ.title }}</p>
+    <div class="sheet__form">
+      <label class="sheet__label">
+        Heure
+        <input type="time" class="sheet__input" [ngModel]="editTimeValue()" (ngModelChange)="editTimeValue.set($event)" />
+      </label>
+    </div>
+    <div class="sheet__actions">
+      <button type="button" class="sheet__btn sheet__btn--confirm" (click)="confirmEditTime()">Enregistrer</button>
+      <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeEditTimeSheet()">Annuler (Échap)</button>
+    </div>
+  </section>
+}
+
+@if (deleteSheetOpen() && deleteTarget(); as occ) {
+  <div class="sheet-backdrop" (click)="closeDeleteSheet()"></div>
+  <section class="bottom-sheet bottom-sheet--confirm" role="alertdialog" aria-modal="true" aria-labelledby="agenda-delete-title">
+    <h2 id="agenda-delete-title" class="sheet__title">Supprimer {{ occ.title }} ?</h2>
+    <p class="sheet__subtitle">Seule l'occurrence de cette journee sera supprimee.</p>
+    <div class="sheet__actions">
+      <button type="button" class="sheet__btn sheet__btn--delete" (click)="confirmDelete()">Supprimer</button>
+      <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeDeleteSheet()">Annuler (Échap)</button>
+    </div>
+  </section>
+}
+
+@if (rescheduleSheetOpen() && rescheduleTarget(); as occ) {
+  <div class="sheet-backdrop" (click)="closeRescheduleSheet()"></div>
+  <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="agenda-reschedule-title">
+    <h2 id="agenda-reschedule-title" class="sheet__title">Decaler la tache</h2>
+    <p class="sheet__subtitle">{{ occ.icon }} {{ occ.title }}</p>
+    <div class="sheet__form">
+      <label class="sheet__label">
+        Nouvelle date
+        <input type="date" class="sheet__input" [ngModel]="rescheduleDate()" (ngModelChange)="rescheduleDate.set($event)" />
+      </label>
+      <label class="sheet__label">
+        Nouvelle heure
+        <input type="time" class="sheet__input" [ngModel]="rescheduleTime()" (ngModelChange)="rescheduleTime.set($event)" />
+      </label>
+    </div>
+    <div class="sheet__actions">
+      <button type="button" class="sheet__btn sheet__btn--confirm" (click)="confirmReschedule()">Decaler</button>
+      <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeRescheduleSheet()">Annuler (Échap)</button>
+    </div>
+  </section>
+}

@@ -1,0 +1,229 @@
+<section class="goals-page">
+  <header class="goals-hero">
+    <div class="goals-hero__copy">
+      <p class="goals-hero__eyebrow">Pilotage vivant</p>
+      <h1>Objectifs</h1>
+      <p class="goals-hero__lead">Cadre tes ambitions, mesure l’élan réel de tes habitudes et repère vite ce qui décroche.</p>
+
+      <div class="goals-hero__chips" aria-label="Résumé objectifs">
+        <span class="goals-chip">Actifs {{ goals().length }}</span>
+        <span class="goals-chip goals-chip--muted">En veille {{ inactiveGoals().length }}</span>
+        <span class="goals-chip goals-chip--success">Atteints {{ achievedGoalCount() }}</span>
+        <span class="goals-chip goals-chip--warning">Restants {{ totalRemainingCount() }}</span>
+      </div>
+    </div>
+
+    <div class="goals-hero__spotlight" aria-hidden="true">
+      <div class="goals-hero__orb"></div>
+      <div class="goals-hero__stat">
+        <span>Moyenne de progression</span>
+        <strong>{{ averageProgress() }}%</strong>
+      </div>
+    </div>
+  </header>
+
+  @if (errorMessage()) {
+    <p class="feedback feedback--error" role="alert">{{ errorMessage() }}</p>
+  }
+
+  @if (successMessage()) {
+    <p class="feedback feedback--success" role="status">{{ successMessage() }}</p>
+  }
+
+  <section class="goals-layout">
+    <section class="goal-editor">
+      <div class="goal-editor__header">
+        <div>
+          <p class="goal-editor__eyebrow">Réglage</p>
+          <h2>{{ editingGoalId() ? 'Modifier un objectif' : 'Créer un objectif' }}</h2>
+        </div>
+        @if (editingGoalId()) {
+          <button type="button" class="ghost-btn" (click)="cancelEdit()">Nouvel objectif</button>
+        }
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="goal-form">
+        <label>
+          <span>Portée</span>
+          <select formControlName="goalScope">
+            <option value="GLOBAL">Globale</option>
+            <option value="TASK">Par tâche</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Période</span>
+          <select formControlName="periodType">
+            <option value="WEEKLY">Hebdomadaire</option>
+            <option value="MONTHLY">Mensuelle</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Cible</span>
+          <input type="number" min="1" max="1000" formControlName="targetCount">
+        </label>
+
+        @if (isTaskScope()) {
+          <label class="goal-form__task">
+            <span>Tâche éligible</span>
+            <select formControlName="taskDefinitionId">
+              <option value="">Choisir une tâche</option>
+              @for (task of eligibleTasks(); track task.taskDefinitionId) {
+                <option [value]="task.taskDefinitionId">{{ task.icon }} {{ task.title }} · {{ periodLabel(task.recurrenceType) }}</option>
+              }
+            </select>
+          </label>
+        }
+
+        @if (editingGoalId()) {
+          <label class="goal-form__checkbox">
+            <input type="checkbox" formControlName="active">
+            <span>Objectif actif</span>
+          </label>
+        }
+
+        <button type="submit" class="primary-btn" [disabled]="submitting()">
+          {{ submitting() ? 'Enregistrement…' : (editingGoalId() ? 'Mettre à jour' : 'Créer') }}
+        </button>
+      </form>
+    </section>
+
+    <section class="goals-content">
+      @if (loading()) {
+        <p class="state-message">Chargement des objectifs…</p>
+      } @else {
+        @if (goals().length === 0) {
+          <section class="goals-empty">
+            <p class="goals-empty__eyebrow">Point de départ</p>
+            <h2>Aucun objectif actif pour le moment</h2>
+            <p>Crée un cap hebdomadaire ou mensuel pour rendre ta progression lisible dans toute l’app.</p>
+          </section>
+        } @else {
+          <section class="goals-grid">
+            @for (goal of goals(); track goal.id) {
+              <article class="goal-card" [class.goal-card--met]="goal.currentProgress.goalMet">
+                <div class="goal-card__head">
+                  <div>
+                    <p class="goal-card__meta">{{ scopeLabel(goal) }} · {{ periodLabel(goal.periodType) }}</p>
+                    <h2>{{ goal.taskTitle ? ((goal.taskIcon ?? '') + ' ' + goal.taskTitle) : 'Objectif global' }}</h2>
+                  </div>
+                  <span class="goal-card__badge" [class.goal-card__badge--met]="goal.currentProgress.goalMet">
+                    {{ goal.currentProgress.completedCount }}/{{ goal.targetCount }}
+                  </span>
+                </div>
+
+                <button type="button" class="goal-card__period-button" (click)="openCurrentPeriod(goal)">
+                  <span class="goal-card__state">{{ progressStateLabel(goal) }}</span>
+                  <span>{{ goal.currentProgress.periodStart }} → {{ goal.currentProgress.periodEnd }}</span>
+                </button>
+
+                <div class="goal-card__progress">
+                  <div class="goal-card__progress-bar">
+                    <span [style.width.%]="goal.currentProgress.progressPercent"></span>
+                  </div>
+                  <div class="goal-card__progress-copy">
+                    <p>{{ goal.currentProgress.progressPercent }}%</p>
+                    <p>reste {{ goal.currentProgress.remainingCount }}</p>
+                  </div>
+                </div>
+
+                @if (visibleHistory(goal).length > 0) {
+                  <div class="goal-card__history">
+                    <div class="goal-card__history-head">
+                      <h3>Historique récent</h3>
+                      <span>Clique pour détailler</span>
+                    </div>
+                    <ul>
+                      @for (item of visibleHistory(goal); track item.periodStart + item.periodEnd) {
+                        <li>
+                          <button type="button" class="goal-card__history-button" (click)="openHistoryPeriod(goal, item)">
+                            <span>{{ historyLabel(item, goal.periodType) }}</span>
+                            <strong [class.goal-card__history--met]="item.goalMet">{{ item.completedCount }}/{{ item.targetCount }}</strong>
+                          </button>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+
+                <div class="goal-card__actions">
+                  <button type="button" class="ghost-btn" (click)="editGoal(goal)">Modifier</button>
+                  <button type="button" class="danger-btn" (click)="deleteGoal(goal)" [disabled]="deletingGoalId() === goal.id">
+                    {{ deletingGoalId() === goal.id ? 'Suppression…' : 'Supprimer' }}
+                  </button>
+                </div>
+              </article>
+            }
+          </section>
+        }
+
+        @if (inactiveGoals().length > 0) {
+          <section class="goal-archive">
+            <div class="goal-archive__head">
+              <div>
+                <p class="goal-editor__eyebrow">Réserve</p>
+                <h2>Objectifs inactifs</h2>
+              </div>
+              <span>{{ inactiveGoals().length }} en veille</span>
+            </div>
+
+            <div class="goal-archive__list">
+              @for (goal of inactiveGoals(); track goal.id) {
+                <article class="goal-archive__item">
+                  <div>
+                    <p class="goal-card__meta">{{ scopeLabel(goal) }} · {{ periodLabel(goal.periodType) }}</p>
+                    <h3>{{ goal.taskTitle ? ((goal.taskIcon ?? '') + ' ' + goal.taskTitle) : 'Objectif global' }}</h3>
+                    <p class="goal-archive__copy">Dernier état connu : {{ goal.currentProgress.completedCount }}/{{ goal.targetCount }} sur {{ historyLabel(goal.currentProgress, goal.periodType) }}</p>
+                  </div>
+                  <button type="button" class="ghost-btn" [disabled]="submitting()" (click)="reactivateGoal(goal)">Réactiver</button>
+                </article>
+              }
+            </div>
+          </section>
+        }
+      }
+    </section>
+  </section>
+
+  @if (selectedPeriodDetail(); as detail) {
+    <div class="goal-detail-modal" role="dialog" aria-modal="true" aria-labelledby="goal-detail-title" (click)="closePeriodDetail()">
+      <section class="goal-detail" aria-live="polite" (click)="stopModalPropagation($event)">
+        <div class="goal-detail__head">
+          <div>
+            <p class="goal-editor__eyebrow">Détail période</p>
+            <h2 id="goal-detail-title">{{ detail.goalTitle }}</h2>
+          </div>
+          <button type="button" class="ghost-btn goal-detail__close" (click)="closePeriodDetail()">Fermer</button>
+        </div>
+
+        <div class="goal-detail__hero">
+          <div>
+            <span class="goal-detail__label">{{ detail.periodLabel }}</span>
+            <strong>{{ detail.snapshot.completedCount }}/{{ detail.snapshot.targetCount }}</strong>
+          </div>
+          <span class="goal-card__state">{{ detailStateLabel(detail) }}</span>
+        </div>
+
+        <dl class="goal-detail__stats">
+          <div>
+            <dt>Période</dt>
+            <dd>{{ detail.snapshot.periodStart }} → {{ detail.snapshot.periodEnd }}</dd>
+          </div>
+          <div>
+            <dt>Progression</dt>
+            <dd>{{ detail.snapshot.progressPercent }}%</dd>
+          </div>
+          <div>
+            <dt>Complétées</dt>
+            <dd>{{ detail.snapshot.completedCount }}</dd>
+          </div>
+          <div>
+            <dt>Restantes</dt>
+            <dd>{{ detail.snapshot.remainingCount }}</dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+  }
+</section>

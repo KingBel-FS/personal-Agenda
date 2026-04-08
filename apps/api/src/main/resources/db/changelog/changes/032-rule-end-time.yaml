@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: 032-add-end-time-to-task-rules
+      author: gino
+      changes:
+        - addColumn:
+            tableName: task_rules
+            columns:
+              - column:
+                  name: end_time
+                  type: TIME
+                  constraints:
+                    nullable: true

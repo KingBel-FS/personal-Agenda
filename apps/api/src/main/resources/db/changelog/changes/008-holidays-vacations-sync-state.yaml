@@ -1,0 +1,163 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-create-holidays
+      author: codex
+      changes:
+        - createTable:
+            tableName: holidays
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: geographic_zone
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: holiday_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: holiday_name
+                  type: varchar(150)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: source_year
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: holidays
+            columnNames: geographic_zone, holiday_date
+            constraintName: uq_holidays_zone_date
+  - changeSet:
+      id: 011-create-vacation-periods
+      author: codex
+      changes:
+        - createTable:
+            tableName: vacation_periods
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: label
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: vacation_periods
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_vacation_periods_user_id
+  - changeSet:
+      id: 012-create-holiday-sync-states
+      author: codex
+      changes:
+        - createTable:
+            tableName: holiday_sync_states
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: geographic_zone
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_synced_year
+                  type: int
+              - column:
+                  name: last_synced_at
+                  type: timestamp with time zone
+              - column:
+                  name: retry_count
+                  type: int
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: next_retry_at
+                  type: timestamp with time zone
+              - column:
+                  name: last_error
+                  type: varchar(500)
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: holiday_sync_states
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_holiday_sync_states_user_id
+        - addUniqueConstraint:
+            tableName: holiday_sync_states
+            columnNames: user_id
+            constraintName: uq_holiday_sync_states_user_id
+  - changeSet:
+      id: 013-seed-holiday-sync-state-existing-users
+      author: codex
+      changes:
+        - sql:
+            sql: |
+              insert into holiday_sync_states (id, user_id, geographic_zone, status, retry_count, updated_at)
+              select gen_random_uuid(), id, geographic_zone, 'PENDING', 0, now()
+              from users
+              on conflict (user_id) do nothing;

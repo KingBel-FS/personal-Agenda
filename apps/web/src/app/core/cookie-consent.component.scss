@@ -1,0 +1,110 @@
+/* ── Cookie consent banner ───────────────────────────────────────── */
+:host { display: contents; }
+
+.consent-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: var(--sp-4) var(--sp-4) max(var(--sp-4), env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, .12);
+}
+
+.consent-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  flex-wrap: wrap;
+}
+
+.consent-text {
+  flex: 1;
+  min-width: 240px;
+}
+
+.consent-title {
+  margin: 0 0 var(--sp-1);
+  font-weight: 700;
+  font-size: .875rem;
+  color: var(--ink);
+}
+
+.consent-desc {
+  margin: 0;
+  font-size: .8125rem;
+  color: var(--ink-3);
+  line-height: var(--leading);
+
+  code {
+    background: var(--surface-3);
+    border-radius: var(--r-xs);
+    padding: 1px 5px;
+    font-family: var(--font-mono);
+    font-size: .875em;
+    color: var(--brand);
+  }
+
+  a {
+    color: var(--brand);
+    font-weight: 600;
+    margin-left: var(--sp-1);
+    text-decoration: none;
+
+    &:hover { text-decoration: underline; }
+    &:focus-visible { outline: 3px solid var(--brand-ring); border-radius: var(--r-xs); }
+  }
+}
+
+.consent-actions {
+  display: flex;
+  gap: var(--sp-3);
+  flex-shrink: 0;
+}
+
+.btn-accept {
+  padding: var(--sp-2) var(--sp-5);
+  border-radius: var(--r-sm);
+  font-family: var(--font);
+  font-size: .875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: var(--brand);
+  color: #fff;
+  transition: background var(--dur) var(--ease);
+
+  &:hover { background: var(--brand-dark); }
+  &:focus-visible { outline: 3px solid var(--brand-ring); outline-offset: 2px; }
+}
+
+.btn-refuse {
+  padding: var(--sp-2) var(--sp-5);
+  border-radius: var(--r-sm);
+  font-family: var(--font);
+  font-size: .875rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--ink);
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+
+  &:hover { background: var(--surface-3); border-color: var(--border-2); }
+  &:focus-visible { outline: 3px solid var(--brand-ring); outline-offset: 2px; }
+}
+
+@media (max-width: 480px) {
+  .consent-inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .consent-actions {
+    justify-content: flex-end;
+  }
+}

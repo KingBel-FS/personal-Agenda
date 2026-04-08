@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: 029-create-user-day-wake-up-override
+      author: dev
+      changes:
+        - createTable:
+            tableName: user_day_wake_up_override
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: override_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: wake_up_time
+                  type: time
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: user_day_wake_up_override
+            columnNames: user_id, override_date
+            constraintName: uq_wake_up_override_user_date

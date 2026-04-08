@@ -1,0 +1,98 @@
+databaseChangeLog:
+  - changeSet:
+      id: 025-create-notification-jobs
+      author: dev-agent
+      changes:
+        - createTable:
+            tableName: notification_jobs
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: occurrence_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: trigger_type
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: scheduled_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(20)
+                  defaultValue: PENDING
+                  constraints:
+                    nullable: false
+              - column:
+                  name: sent_at
+                  type: timestamptz
+              - column:
+                  name: canceled_at
+                  type: timestamptz
+              - column:
+                  name: error_message
+                  type: text
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: notification_jobs
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_notification_jobs_user
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: notification_jobs
+            baseColumnNames: occurrence_id
+            referencedTableName: task_occurrences
+            referencedColumnNames: id
+            constraintName: fk_notification_jobs_occurrence
+            onDelete: CASCADE
+
+        - addUniqueConstraint:
+            tableName: notification_jobs
+            columnNames: occurrence_id, trigger_type
+            constraintName: uq_notification_jobs_occurrence_trigger
+
+        - createIndex:
+            tableName: notification_jobs
+            indexName: idx_notification_jobs_user_id
+            columns:
+              - column:
+                  name: user_id
+
+        - createIndex:
+            tableName: notification_jobs
+            indexName: idx_notification_jobs_status_scheduled
+            columns:
+              - column:
+                  name: status
+              - column:
+                  name: scheduled_at

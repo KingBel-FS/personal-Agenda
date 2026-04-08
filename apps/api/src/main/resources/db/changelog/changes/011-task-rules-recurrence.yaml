@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: 017-task-rules-add-recurrence
+      author: gino
+      changes:
+        - addColumn:
+            tableName: task_rules
+            columns:
+              - column:
+                  name: recurrence_type
+                  type: varchar(20)
+              - column:
+                  name: days_of_week
+                  type: varchar(20)
+              - column:
+                  name: day_of_month
+                  type: int
+              - column:
+                  name: end_date
+                  type: date

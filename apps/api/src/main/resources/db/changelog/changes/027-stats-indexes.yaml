@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: 027-task-occurrence-stats-indexes
+      author: codex
+      changes:
+        - createIndex:
+            tableName: task_occurrences
+            indexName: idx_task_occurrences_user_date_status
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: occurrence_date
+              - column:
+                  name: status
+
+        - createIndex:
+            tableName: task_occurrences
+            indexName: idx_task_occurrences_user_task_date_status
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: task_definition_id
+              - column:
+                  name: occurrence_date
+              - column:
+                  name: status

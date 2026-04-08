@@ -1,0 +1,284 @@
+<!-- ═══════════════════════════════════════
+     Today Page — Vue Aujourd'hui
+     ═══════════════════════════════════════ -->
+
+<!-- ── Persistent live region for screen readers ──────────────────── -->
+<div class="sr-only" aria-live="polite" aria-atomic="true">
+  {{ toastMessage() }}
+</div>
+
+<!-- ── Toast ─────────────────────────────────────────────────────────── -->
+@if (toastMessage()) {
+  <aside class="toast toast--{{ toastType() }}" role="status">
+    <p class="toast__text">{{ toastMessage() }}</p>
+    <button type="button" class="toast__close" (click)="dismissToast()" aria-label="Fermer">×</button>
+  </aside>
+}
+
+<!-- ── Loading skeleton ───────────────────────────────────────────── -->
+@if (loading()) {
+  <div class="today-page" aria-busy="true" aria-label="Chargement en cours">
+    <div class="context-header skeleton-block" aria-hidden="true">
+      <div class="sk-line sk-line--wide"></div>
+      <div class="sk-line sk-line--narrow"></div>
+      <div class="sk-progress"></div>
+      <div class="sk-stats">
+        <div class="sk-stat"></div>
+        <div class="sk-stat"></div>
+        <div class="sk-stat"></div>
+      </div>
+    </div>
+    <ul class="occurrence-list" aria-hidden="true">
+      @for (i of [1,2,3,4]; track i) {
+        <li class="occurrence-card occurrence-card--skeleton">
+          <div class="sk-icon"></div>
+          <div class="sk-content">
+            <div class="sk-line sk-line--med"></div>
+            <div class="sk-line sk-line--short"></div>
+          </div>
+        </li>
+      }
+    </ul>
+  </div>
+}
+
+<!-- ── Error state ─────────────────────────────────────────────────── -->
+@if (!loading() && errorMessage()) {
+  <div class="today-page">
+    <div class="state-error" role="alert">
+      <p>{{ errorMessage() }}</p>
+    </div>
+  </div>
+}
+
+<!-- ── Loaded ──────────────────────────────────────────────────────── -->
+@if (!loading() && !errorMessage() && today()) {
+  <div class="today-page">
+
+    <app-day-context-header
+      [dateLabel]="formatDate(today()!.date)"
+      [categoryLabel]="dayCategoryLabel(today()!.dayCategory)"
+      [dayVariant]="dayVariant(today()!.dayCategory)"
+      [progressPercent]="today()!.progressPercent"
+      [activeCount]="today()!.activeCount"
+      [doneCount]="today()!.doneCount"
+      [missedCount]="today()!.missedCount"
+      [skippedCount]="today()!.skippedCount"
+      hint="Tape pour ouvrir · appui long pour plus d'options"
+      [showCreate]="!today()!.beforeAccountCreation"
+      (create)="openCreateTask()"
+    />
+
+    <!-- Occurrence list -->
+    @if (today()!.occurrences.length === 0) {
+      <div class="empty-state">
+        <p class="empty-state__text">Aucune tâche prévue aujourd'hui.</p>
+      </div>
+    } @else {
+      <ul class="occurrence-list" aria-label="Tâches du jour">
+        @for (occ of today()!.occurrences; track occ.id) {
+          <li>
+            <app-task-card
+              [icon]="occ.icon"
+              [title]="occ.title"
+              [description]="occ.description"
+              [time]="occ.occurrenceTime"
+              [dateTime]="today()!.date + 'T' + occ.occurrenceTime"
+              [status]="occ.status"
+              [ariaLabel]="occ.title + ' à ' + occ.occurrenceTime + ' — ' + statusLabel(occ.status)"
+              [slotOrder]="occ.slotOrder"
+              [totalSlotsPerDay]="occ.totalSlotsPerDay"
+              [busy]="busy()"
+              [disabled]="occ.status === 'skipped'"
+              (pointerDown)="onPointerDown(occ)"
+              (pointerUp)="onPointerUp(occ)"
+              (pointerLeave)="onPointerLeave()"
+            />
+          </li>
+        }
+      </ul>
+    }
+
+  </div>
+}
+
+<!-- ── Context menu (long press) ──────────────────────────────────── -->
+@if (contextMenuOpen() && contextTarget(); as occ) {
+  <div class="sheet-backdrop" (click)="closeContextMenu()"></div>
+  <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="ctx-title">
+    <h2 id="ctx-title" class="sheet__title">{{ occ.icon }} {{ occ.title }}</h2>
+    <p class="sheet__subtitle">{{ occ.occurrenceTime }} · {{ statusLabel(occ.status) }}</p>
+
+    <div class="sheet__actions">
+      @if (occ.status !== 'done') {
+        <button type="button" class="sheet__btn sheet__btn--done" (click)="contextAction('done')">
+          <span class="sheet__btn-icon">✓</span> Marquer terminée
+        </button>
+      }
+      @if (occ.status !== 'missed') {
+        <button type="button" class="sheet__btn sheet__btn--missed" (click)="contextAction('missed')">
+          <span class="sheet__btn-icon">✗</span> Marquer manquée
+        </button>
+      }
+      @if (occ.status === 'done' || occ.status === 'missed') {
+        <button type="button" class="sheet__btn sheet__btn--edit" (click)="contextAction('revert')">
+          <span class="sheet__btn-icon">↩</span> Remettre à faire
+        </button>
+      }
+      <button type="button" class="sheet__btn sheet__btn--edit" (click)="openManageEditor(occ, 'THIS_OCCURRENCE')">
+        <span class="sheet__btn-icon">✎</span> Modifier cette occurrence
+      </button>
+      @if (occ.recurring) {
+        <button type="button" class="sheet__btn sheet__btn--edit" (click)="contextAction('edit-series')">
+          <span class="sheet__btn-icon">⟲</span> Modifier la série
+        </button>
+      }
+      <button type="button" class="sheet__btn sheet__btn--edit" (click)="contextAction('edit')">
+        <span class="sheet__btn-icon">📝</span> Modifier la description
+      </button>
+      @if (!occ.recurring && occ.status === 'planned') {
+        <button type="button" class="sheet__btn sheet__btn--edit" (click)="contextAction('reschedule')">
+          <span class="sheet__btn-icon">📅</span> Décaler (date + heure)
+        </button>
+      }
+      <button type="button" class="sheet__btn sheet__btn--delete" (click)="contextAction('delete')">
+        <span class="sheet__btn-icon">🗑</span> Supprimer l'occurrence
+      </button>
+      <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeContextMenu()">
+        Annuler
+      </button>
+    </div>
+  </section>
+}
+
+<!-- ── Edit description sheet ─────────────────────────────────────── -->
+@if (editSheetOpen() && editTarget(); as occ) {
+  <div class="sheet-backdrop" (click)="closeEditSheet()"></div>
+  <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="edit-title">
+    <h2 id="edit-title" class="sheet__title">✎ Modifier la description</h2>
+    <p class="sheet__subtitle">{{ occ.icon }} {{ occ.title }}</p>
+
+    <div class="sheet__form">
+      <textarea
+        class="sheet__textarea"
+        rows="3"
+        placeholder="Description de l'occurrence…"
+        [ngModel]="editDescriptionValue()"
+        (ngModelChange)="editDescriptionValue.set($event)"
+        aria-label="Description"
+      ></textarea>
+    </div>
+
+    <div class="sheet__actions">
+      <button type="button" class="sheet__btn sheet__btn--confirm" (click)="confirmEditDescription()">
+        Enregistrer
+      </button>
+      <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeEditSheet()">
+        Annuler
+      </button>
+    </div>
+  </section>
+}
+
+<!-- ── Delete confirmation sheet ──────────────────────────────────── -->
+@if (deleteSheetOpen() && deleteTarget(); as occ) {
+  <div class="sheet-backdrop" (click)="closeDeleteSheet()"></div>
+  <section class="bottom-sheet bottom-sheet--confirm" role="alertdialog" aria-modal="true" aria-labelledby="delete-title">
+    <div class="sheet__icon-wrap">🗑</div>
+    <h2 id="delete-title" class="sheet__title">Supprimer « {{ occ.title }} » ?</h2>
+    <p class="sheet__reassurance">Seule l'occurrence d'aujourd'hui sera supprimée. La série n'est pas affectée.</p>
+
+    <div class="sheet__actions">
+      <button type="button" class="sheet__btn sheet__btn--confirm sheet__btn--danger" (click)="confirmDelete()">
+        Supprimer
+      </button>
+      <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeDeleteSheet()">
+        Annuler
+      </button>
+    </div>
+  </section>
+}
+
+<!-- ── Reschedule sheet (one-time only) ────────────────────────────── -->
+@if (rescheduleSheetOpen() && rescheduleTarget(); as occ) {
+  <div class="sheet-backdrop" (click)="closeRescheduleSheet()"></div>
+  <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="reschedule-title">
+    <h2 id="reschedule-title" class="sheet__title">📅 Décaler la tâche</h2>
+    <p class="sheet__subtitle">{{ occ.icon }} {{ occ.title }}</p>
+
+    <div class="sheet__form">
+      <label class="sheet__label">
+        Nouvelle date
+        <input
+          type="date"
+          class="sheet__input"
+          [ngModel]="rescheduleDate()"
+          (ngModelChange)="rescheduleDate.set($event)"
+          aria-label="Nouvelle date"
+        />
+      </label>
+      <label class="sheet__label">
+        Nouvelle heure
+        <input
+          type="time"
+          class="sheet__input"
+          [ngModel]="rescheduleTime()"
+          (ngModelChange)="rescheduleTime.set($event)"
+          aria-label="Nouvelle heure"
+        />
+      </label>
+    </div>
+
+    <div class="sheet__actions">
+      <button type="button" class="sheet__btn sheet__btn--confirm" (click)="confirmReschedule()">
+        Décaler
+      </button>
+      <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeRescheduleSheet()">
+        Annuler
+      </button>
+    </div>
+  </section>
+}
+
+<!-- ── Detail view sheet ──────────────────────────────────────────── -->
+@if (detailSheetOpen() && detailTarget(); as occ) {
+  <div class="sheet-backdrop" (click)="closeDetailSheet()"></div>
+  <section class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+    <div class="detail-header">
+      <span class="detail-icon">{{ occ.icon }}</span>
+      <div>
+        <h2 id="detail-title" class="sheet__title">{{ occ.title }}</h2>
+        <p class="sheet__subtitle">{{ occ.occurrenceTime }} · {{ statusLabel(occ.status) }}</p>
+      </div>
+    </div>
+
+    @if (occ.description) {
+      <p class="detail-description">{{ occ.description }}</p>
+    } @else {
+      <p class="detail-empty">Aucune description.</p>
+    }
+
+    @if (occ.status === 'planned') {
+      <div class="sheet__actions">
+        <button type="button" class="sheet__btn sheet__btn--done" (click)="detailAction('done')">
+          <span class="sheet__btn-icon">✓</span> Marquer terminée
+        </button>
+        <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeDetailSheet()">
+          Fermer
+        </button>
+      </div>
+    } @else if (occ.status === 'done' || occ.status === 'missed') {
+      <div class="sheet__actions">
+        <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeDetailSheet()">
+          Fermer
+        </button>
+      </div>
+    } @else {
+      <div class="sheet__actions">
+        <button type="button" class="sheet__btn sheet__btn--cancel" (click)="closeDetailSheet()">
+          Fermer
+        </button>
+      </div>
+    }
+  </section>
+}

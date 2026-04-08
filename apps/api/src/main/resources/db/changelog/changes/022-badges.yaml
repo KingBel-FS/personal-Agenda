@@ -1,0 +1,50 @@
+databaseChangeLog:
+  - changeSet:
+      id: 022-create-badges
+      author: gino
+      changes:
+        - createTable:
+            tableName: badges
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: badge_type
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: unlocked_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: badges
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_badges_user
+            onDelete: CASCADE
+
+        - createIndex:
+            indexName: idx_badges_user
+            tableName: badges
+            columns:
+              - column:
+                  name: user_id
+
+        - addUniqueConstraint:
+            tableName: badges
+            columnNames: user_id, badge_type
+            constraintName: uq_badges_user_type

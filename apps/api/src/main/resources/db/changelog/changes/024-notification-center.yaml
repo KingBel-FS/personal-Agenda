@@ -1,0 +1,79 @@
+databaseChangeLog:
+  - changeSet:
+      id: 024-create-notification-center
+      author: gino
+      changes:
+        - createTable:
+            tableName: notification_center
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: body
+                  type: text
+              - column:
+                  name: icon_url
+                  type: varchar(500)
+              - column:
+                  name: notification_type
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: related_task_id
+                  type: uuid
+              - column:
+                  name: status
+                  type: varchar(20)
+                  defaultValue: RECEIVED
+                  constraints:
+                    nullable: false
+              - column:
+                  name: viewed_at
+                  type: timestamptz
+              - column:
+                  name: dismissed_at
+                  type: timestamptz
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: notification_center
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_notification_center_user
+            onDelete: CASCADE
+
+        - createIndex:
+            indexName: idx_notification_center_user_id
+            tableName: notification_center
+            columns:
+              - column:
+                  name: user_id
+
+        - createIndex:
+            indexName: idx_notification_center_created_at
+            tableName: notification_center
+            columns:
+              - column:
+                  name: created_at
+                  descending: true

@@ -1,0 +1,444 @@
+<main class="tasks-shell">
+  @if (toastMessage()) {
+    <aside class="toast toast-error" role="alert" aria-live="assertive">
+      <p>{{ toastMessage() }}</p>
+      <button type="button" class="toast-close" (click)="dismissToast()" aria-label="Fermer la notification">×</button>
+    </aside>
+  }
+
+  <section class="hero">
+    <button type="button" class="back-link" (click)="goBack()">← Retour</button>
+    <p class="eyebrow">Occurrences</p>
+    <h1>Filtrer, paginer et corriger sans casser l'historique.</h1>
+    <p class="lede">
+      Par défaut, seules les occurrences futures remontent. Utilise les dates pour élargir la fenêtre.
+    </p>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Occurrences matérialisées</h2>
+      <a routerLink="/tasks/new" class="primary-link">Nouvelle tâche</a>
+    </div>
+
+    <form class="filters" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+      <label>
+        Recherche par nom
+        <input type="search" formControlName="search" placeholder="Ex. Sport, Lecture, Routine..." />
+      </label>
+
+      <label>
+        Type
+        <select formControlName="taskKind">
+          <option value="ALL">Toutes</option>
+          <option value="ONE_TIME">Ponctuelles</option>
+          <option value="RECURRING_AFTER_DATE">Récurrentes avec date de fin après...</option>
+        </select>
+      </label>
+
+      @if (filterForm.controls.taskKind.value === 'RECURRING_AFTER_DATE') {
+        <label>
+          Date de comparaison
+          <input type="date" formControlName="selectedDate" />
+        </label>
+      }
+
+      <label>
+        Occurrences à partir du
+        <input type="date" formControlName="occurrenceDateFrom" />
+      </label>
+
+      <label>
+        Occurrences jusqu'au
+        <input type="date" formControlName="occurrenceDateTo" />
+      </label>
+
+      <label>
+        Horaire
+        <select formControlName="timeMode">
+          <option value="ALL">Tous</option>
+          <option value="FIXED">Heure fixe</option>
+          <option value="WAKE_UP_OFFSET">Décalage réveil</option>
+        </select>
+      </label>
+
+      @if (filterForm.controls.timeMode.value === 'FIXED') {
+        <label>
+          Heure fixe
+          <input type="time" formControlName="fixedTime" />
+        </label>
+      }
+
+      @if (filterForm.controls.timeMode.value === 'WAKE_UP_OFFSET') {
+        <div class="offset-filter">
+          <div class="offset-field">
+            <label for="filterWakeUpOffsetHours">Heures</label>
+            <input id="filterWakeUpOffsetHours" type="number" formControlName="wakeUpOffsetHours" min="0" max="12" step="1" />
+          </div>
+          <div class="offset-field">
+            <label for="filterWakeUpOffsetMins">Minutes</label>
+            <input id="filterWakeUpOffsetMins" type="number" formControlName="wakeUpOffsetMins" min="0" max="55" step="5" />
+          </div>
+        </div>
+      }
+
+      <div class="filter-actions">
+        <button type="submit">Appliquer</button>
+        <button type="button" class="secondary-button" (click)="resetFilters()">Réinitialiser</button>
+      </div>
+    </form>
+
+    @if (loading()) {
+      <p class="info">Chargement des occurrences...</p>
+    }
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+    @if (successMessage()) {
+      <p class="success">{{ successMessage() }}</p>
+    }
+
+    @if (!loading() && occurrences().length) {
+      <div class="results-head">
+        <p class="info">{{ resultRangeLabel() }}</p>
+      </div>
+
+      <div class="occurrence-list">
+        @for (occurrence of occurrences(); track occurrence.id) {
+          <article class="occurrence-card" [class.locked]="occurrence.pastLocked">
+            <div class="occurrence-meta">
+              <p class="occurrence-title">
+                {{ occurrence.icon }} {{ occurrence.title }}
+                @if (occurrence.totalSlotsPerDay > 1 && occurrence.slotOrder != null) {
+                  <span class="slot-badge">Créneau {{ occurrence.slotOrder }}/{{ occurrence.totalSlotsPerDay }}</span>
+                }
+              </p>
+              <p class="occurrence-detail">
+                {{ occurrence.occurrenceDate }} · {{ occurrence.occurrenceTime.slice(0, 5) }} ·
+                {{ dayCategoryLabel(occurrence.dayCategory) }}
+              </p>
+              @if (occurrence.description) {
+                <p class="occurrence-description">{{ occurrence.description }}</p>
+              }
+              <p class="occurrence-detail">
+                @if (occurrence.timeMode === 'FIXED') {
+                  Heure fixe : {{ occurrence.fixedTime?.slice(0, 5) ?? occurrence.occurrenceTime.slice(0, 5) }}
+                } @else {
+                  Décalage réveil : {{ occurrence.wakeUpOffsetMinutes }} min
+                }
+              </p>
+              @if (occurrence.pastLocked) {
+                <p class="lock-note">Occurrence passée : consultation complète, modification limitée à l'heure et au statut.</p>
+              }
+            </div>
+
+            <div class="occurrence-actions">
+              <button type="button" class="secondary-button" (click)="openScopeSheet('edit', occurrence)">
+                Modifier
+              </button>
+              <button type="button" class="danger-button" [disabled]="!canDeleteOccurrence(occurrence)" (click)="openScopeSheet('delete', occurrence)">
+                Supprimer
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+
+      <div class="pagination-bar">
+        <div class="pagination-actions">
+          <button type="button" class="secondary-button" [disabled]="currentPage() === 0 || loading()" (click)="previousPage()">
+            Précédent
+          </button>
+          <p class="info">Page {{ currentPage() + 1 }} / {{ totalPages() || 1 }}</p>
+          <button
+            type="button"
+            class="secondary-button"
+            [disabled]="loading() || currentPage() + 1 >= totalPages()"
+            (click)="nextPage()"
+          >
+            Suivant
+          </button>
+        </div>
+      </div>
+    } @else if (!loading()) {
+      <p class="info">Aucune occurrence ne correspond aux filtres courants.</p>
+    }
+  </section>
+
+  @if (scopeSheetOpen() && selectedOccurrence(); as occurrence) {
+    <div class="sheet-backdrop" (click)="closeScopeSheet()"></div>
+    <section class="scope-sheet" aria-modal="true" role="dialog" aria-labelledby="sheet-title">
+      <h2 id="sheet-title">
+        {{ pendingAction() === 'edit' ? "Modifier l'occurrence" : "Supprimer l'occurrence" }}
+      </h2>
+      <p class="sheet-description">
+        {{ occurrence.icon }} {{ occurrence.title }} · {{ occurrence.occurrenceDate }} · {{ occurrence.occurrenceTime.slice(0, 5) }}
+      </p>
+
+      @if (!occurrence.pastLocked) {
+        <fieldset class="scope-options">
+          <legend>Portée</legend>
+          <label class="scope-option">
+            <input type="radio" name="scope" [checked]="selectedScope() === 'THIS_OCCURRENCE'" (change)="selectedScope.set('THIS_OCCURRENCE')" />
+            <span>Cette occurrence uniquement</span>
+          </label>
+          <label class="scope-option" [class.disabled]="!canEditSeriesScope(occurrence)">
+            <input
+              type="radio"
+              name="scope"
+              [checked]="selectedScope() === 'THIS_AND_FOLLOWING'"
+              [disabled]="!canEditSeriesScope(occurrence)"
+              (change)="selectedScope.set('THIS_AND_FOLLOWING')"
+            />
+            <span>Cette occurrence et les suivantes</span>
+          </label>
+          @if (occurrence.recurring && !occurrence.futureScopeAvailable) {
+            <p class="field-hint">{{ seriesScopeHelperMessage(occurrence) }}</p>
+          }
+        </fieldset>
+      } @else {
+        <p class="past-edit-note">Sur une occurrence passée, seule l'heure et le statut d'exécution restent modifiables.</p>
+      }
+
+      @if (pendingAction() === 'edit') {
+        <form [formGroup]="editForm">
+          @if (occurrence.pastLocked) {
+            <label>
+              <span>Heure</span>
+              <input type="time" formControlName="fixedTime" />
+            </label>
+
+            <fieldset class="scope-options">
+              <legend>Statut d'exécution</legend>
+              @for (status of ['planned', 'done', 'missed']; track status) {
+                <label class="scope-option">
+                  <input
+                    type="radio"
+                    name="pastStatus"
+                    [checked]="pastStatus() === status"
+                    (change)="pastStatus.set($any(status))"
+                  />
+                  <span>{{ pastStatusLabel($any(status)) }}</span>
+                </label>
+              }
+            </fieldset>
+          } @else {
+            <label>
+              <span>Titre <span aria-hidden="true">*</span></span>
+              <input type="text" formControlName="title" />
+            </label>
+            @if (controlInvalid('title')) {
+              <p class="field-error">Titre requis.</p>
+            }
+
+            <label>
+              <span>Icône <span aria-hidden="true">*</span></span>
+              <div class="icon-picker-row">
+                <button
+                  type="button"
+                  class="icon-preview"
+                  [class.placeholder]="!editForm.controls.icon.value"
+                  (click)="showEmojiPicker.set(!showEmojiPicker())"
+                  [attr.aria-expanded]="showEmojiPicker()"
+                  aria-label="Choisir une icône emoji"
+                >
+                  {{ editForm.controls.icon.value || '➕' }}
+                </button>
+                @if (editForm.controls.icon.value) {
+                  <span class="icon-selected-hint">{{ editForm.controls.icon.value }} sélectionnée, clique pour changer</span>
+                } @else {
+                  <span class="icon-selected-hint">Clique pour choisir ton emoji</span>
+                }
+              </div>
+              @if (showEmojiPicker()) {
+                <div class="emoji-picker-wrap">
+                  <app-emoji-picker (emojiSelected)="onEmojiSelected($event)" />
+                </div>
+              }
+            </label>
+
+            <label>
+              <span>Description <span class="optional">(optionnelle)</span></span>
+              <textarea rows="3" formControlName="description"></textarea>
+            </label>
+
+            <label for="task-photo-upload" class="file-label">
+              <span>Photo <span class="optional">(optionnelle)</span></span>
+              <span class="file-button">Choisir une photo</span>
+            </label>
+            <input
+              id="task-photo-upload"
+              type="file"
+              accept="image/*"
+              class="file-input"
+              (change)="onPhotoSelected($event)"
+            />
+            @if (selectedPhotoName()) {
+              <p class="photo-hint">Photo sélectionnée : {{ selectedPhotoName() }}</p>
+            } @else {
+              <p class="photo-hint">Aucune nouvelle photo sélectionnée.</p>
+            }
+
+            <fieldset class="scope-options">
+              <legend>Mode horaire</legend>
+              <label class="scope-option">
+                <input type="radio" formControlName="timeMode" value="FIXED" />
+                <span>Heure fixe</span>
+              </label>
+              <label class="scope-option">
+                <input type="radio" formControlName="timeMode" value="WAKE_UP_OFFSET" />
+                <span>Décalage réveil</span>
+              </label>
+            </fieldset>
+
+            @if (editForm.controls.timeMode.value === 'FIXED') {
+              <label>
+                <span>Heure <span aria-hidden="true">*</span></span>
+                <input type="time" formControlName="fixedTime" />
+              </label>
+            } @else {
+              <div class="field">
+                <p class="field-hint">Décalage depuis l'heure de réveil (0 min = réveil exact).</p>
+                <div class="offset-row">
+                  <div class="offset-field">
+                    <label for="editWakeUpOffsetHours">Heures</label>
+                    <input id="editWakeUpOffsetHours" type="number" formControlName="wakeUpOffsetHours" min="0" max="12" step="1" />
+                  </div>
+                  <div class="offset-field">
+                    <label for="editWakeUpOffsetMins">Minutes</label>
+                    <input id="editWakeUpOffsetMins" type="number" formControlName="wakeUpOffsetMins" min="0" max="55" step="5" />
+                  </div>
+                </div>
+              </div>
+            }
+
+            @if (showSeriesEditor()) {
+              <fieldset class="scope-options">
+                <legend>Récurrence future</legend>
+                <label class="scope-option">
+                  <input type="radio" formControlName="recurrenceType" value="WEEKLY" />
+                  <span>Hebdomadaire</span>
+                </label>
+                <label class="scope-option">
+                  <input type="radio" formControlName="recurrenceType" value="MONTHLY" />
+                  <span>Mensuelle</span>
+                </label>
+              </fieldset>
+
+              <fieldset class="checkbox-group">
+                <legend>Jours concernés</legend>
+                @for (category of dayCategoryKeys; track category) {
+                  <label class="checkbox-label">
+                    <input type="checkbox" [formControlName]="category" />
+                    {{ dayCategoryLabels[category] }}
+                  </label>
+                }
+              </fieldset>
+
+              @if (editForm.controls.recurrenceType.value === 'WEEKLY') {
+                <fieldset class="checkbox-group">
+                  <legend>Jours de la semaine</legend>
+                  @for (day of daysOfWeek; track day.value) {
+                    <label class="checkbox-label">
+                      <input type="checkbox" [formControlName]="'dow' + day.value" />
+                      {{ day.label }}
+                    </label>
+                  }
+                </fieldset>
+              }
+
+              @if (editForm.controls.recurrenceType.value === 'MONTHLY') {
+                <label>
+                  Jour du mois
+                  <input type="number" formControlName="dayOfMonth" min="1" max="31" step="1" />
+                </label>
+              }
+
+              <label>
+                <span>Date de fin <span class="optional">(optionnelle)</span></span>
+                <input type="date" formControlName="endDate" [min]="occurrence.occurrenceDate" />
+              </label>
+            }
+
+            <label>
+              <span>Heure de fin des repetitions <span class="optional">(optionnelle)</span></span>
+              <input type="time" formControlName="endTime" />
+              <p class="field-hint">Les repetitions intra-journalieres s'arretent a cette heure.</p>
+            </label>
+
+            <section class="slots-section" aria-labelledby="edit-slots-title">
+              <h3 id="edit-slots-title">Répétitions dans la journée <span class="optional-badge">(optionnel)</span></h3>
+              @if (selectedScope() === 'THIS_OCCURRENCE') {
+                <p class="slots-hint">Ces répétitions s'appliqueront uniquement à cette occurrence.</p>
+              } @else {
+                <p class="slots-hint">
+                  Le 1er créneau est défini par l'horaire principal ci-dessus. Ajoute ici des répétitions supplémentaires.
+                  La dernière répétition ne sera jamais planifiée après minuit.
+                </p>
+              }
+
+              @for (slotCtrl of slots.controls; track $index) {
+                <div class="slot-card" [formGroup]="$any(slotCtrl)">
+                  <div class="slot-header">
+                    <span class="slot-label">Répétition {{ $index + 1 }}</span>
+                    <button type="button" class="btn-remove-slot" (click)="removeTimeSlot($index)" aria-label="Supprimer cette répétition">✕</button>
+                  </div>
+
+                  <fieldset class="field">
+                    <legend>Mode</legend>
+                    <label class="radio-label">
+                      <input type="radio" formControlName="timeMode" value="EVERY_N_MINUTES" />
+                      Toutes les X h Y min
+                    </label>
+                    <label class="radio-label">
+                      <input type="radio" formControlName="timeMode" value="FIXED" />
+                      Heure fixe
+                    </label>
+                  </fieldset>
+
+                  @if ($any(slotCtrl).controls.timeMode.value === 'EVERY_N_MINUTES') {
+                    <div class="field">
+                      <label>Intervalle</label>
+                      <div class="offset-row">
+                        <input type="number" formControlName="intervalHours" min="0" max="12" step="1" aria-label="Heures" />
+                        <span>h</span>
+                        <input type="number" formControlName="intervalMins" min="0" max="55" step="5" aria-label="Minutes" />
+                        <span>min</span>
+                      </div>
+                      <p class="field-hint">{{ slotScheduleSummary($any(slotCtrl)) }}</p>
+                    </div>
+                  }
+                  @if ($any(slotCtrl).controls.timeMode.value === 'FIXED') {
+                    <div class="field">
+                      <label>Heure</label>
+                      <input type="time" formControlName="fixedTime" />
+                    </div>
+                  }
+                </div>
+              }
+
+              <button type="button" class="btn-add-slot" (click)="addTimeSlot()">+ Ajouter une répétition</button>
+            </section>
+          }
+        </form>
+      } @else {
+        <p class="warning-copy">
+          Cette action est irréversible sur les occurrences ciblées. Les occurrences passées ne seront pas touchées.
+        </p>
+      }
+
+      <div class="sheet-actions">
+        <button type="button" class="secondary-button" (click)="closeScopeSheet()">Annuler</button>
+        <button type="button" [class.danger-button]="pendingAction() === 'delete'" (click)="confirmMutation()" [disabled]="saving()">
+          {{
+            saving()
+              ? 'Traitement...'
+              : pendingAction() === 'edit'
+                ? 'Confirmer la modification'
+                : 'Confirmer la suppression'
+          }}
+        </button>
+      </div>
+    </section>
+  }
+</main>

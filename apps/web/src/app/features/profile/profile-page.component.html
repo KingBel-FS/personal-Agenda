@@ -1,0 +1,236 @@
+<main class="profile-shell">
+  <section class="hero">
+    <p class="eyebrow">Personal Habit Tracker</p>
+    <h1>Règle ton profil et les heures qui pilotent la planification.</h1>
+    <p class="lede">
+      Les valeurs enregistrées ici alimentent la projection métier des occurrences et le calcul des
+      jours fériés.
+    </p>
+  </section>
+
+  <section class="panel" aria-labelledby="profile-title">
+    <div class="panel-head">
+      <h2 id="profile-title">Profil utilisateur</h2>
+    </div>
+
+    @if (loading()) {
+      <p class="info">Chargement du profil...</p>
+    }
+    @if (tokenMissing()) {
+      <p class="error">
+        Session introuvable. <a routerLink="/login">Connecte-toi</a> pour accéder à ton profil.
+      </p>
+    }
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+    @if (syncAlert()?.alertVisible) {
+      <div class="sync-alert">
+        <p class="sync-pill">{{ syncStatusLabel() }}</p>
+        <p>
+          Les jours fériés de ta zone sont en cours de synchronisation. L'application continue de
+          fonctionner et le worker refera une tentative automatiquement.
+        </p>
+        @if (syncAlert()?.nextRetryAt) {
+          <p class="sync-meta">Prochaine tentative: {{ syncAlert()!.nextRetryAt }}</p>
+        }
+        @if (syncAlert()?.lastError) {
+          <p class="field-error">{{ syncAlert()!.lastError }}</p>
+        }
+      </div>
+    }
+    @if (successMessage()) {
+      <p class="success">{{ successMessage() }}</p>
+    }
+
+    @if (!loading() && !tokenMissing()) {
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        @if (profilePhotoUrl()) {
+          <div class="photo-card">
+            <img [src]="profilePhotoUrl()!" alt="Photo de profil" />
+          </div>
+        }
+
+        <label>
+          Pseudo
+          <input type="text" formControlName="pseudo" aria-describedby="pseudo-error" />
+        </label>
+        @if (controlInvalid('pseudo')) {
+          <p class="field-error" id="pseudo-error" role="alert">
+            Le pseudo est requis et limité à 100 caractères.
+          </p>
+        }
+
+        <label>
+          Zone géographique
+          <select formControlName="geographicZone" aria-describedby="zone-impact">
+            <option value="METROPOLE">Métropole</option>
+            <option value="ALSACE_LORRAINE">Alsace-Lorraine</option>
+          </select>
+        </label>
+
+        @if (zoneImpact()) {
+          <div class="impact-card" id="zone-impact">
+            <p class="impact-title">Impact jours fériés</p>
+            <p>{{ zoneImpact()!.impactMessage }}</p>
+            <label class="consent">
+              <input type="checkbox" formControlName="zoneChangeConfirmed" />
+              <span>Je confirme ce changement de zone et son impact sur les jours fériés.</span>
+            </label>
+          </div>
+        }
+
+        <label>
+          Fuseau horaire
+          <input type="text" formControlName="timezoneName" aria-describedby="timezone-error" />
+        </label>
+        @if (controlInvalid('timezoneName')) {
+          <p class="field-error" id="timezone-error" role="alert">
+            Le fuseau doit suivre le format IANA, par exemple <code>Europe/Paris</code>.
+          </p>
+        }
+
+        <div class="grid">
+          <label>
+            Réveil jours travaillés
+            <input type="time" formControlName="workdayWakeUpTime" />
+          </label>
+          <label>
+            Réveil vacances
+            <input type="time" formControlName="vacationWakeUpTime" />
+          </label>
+          <label>
+            Réveil week-end + fériés
+            <input type="time" formControlName="weekendHolidayWakeUpTime" />
+          </label>
+        </div>
+
+        <label>
+          Nouvelle photo de profil
+          <input type="file" accept="image/png,image/jpeg,image/webp" (change)="onPhotoSelected($event)" />
+        </label>
+        @if (selectedPhotoName()) {
+          <p class="file-hint">Fichier : {{ selectedPhotoName() }}</p>
+        }
+
+        <button type="submit" [disabled]="submitting()">
+          {{ submitting() ? 'Sauvegarde...' : 'Enregistrer le profil' }}
+        </button>
+      </form>
+    }
+  </section>
+
+  @if (!loading() && !tokenMissing()) {
+    <section class="panel" aria-labelledby="delete-title">
+      <h2 id="delete-title">Supprimer le compte</h2>
+      <p>
+        La suppression est définitive et irréversible. Toutes tes données personnelles seront
+        effacées dans un délai maximal de 30 minutes. Tu seras déconnecté immédiatement.
+      </p>
+
+      @if (deletionErrorMessage()) {
+        <p class="error">{{ deletionErrorMessage() }}</p>
+      }
+
+      <form [formGroup]="deletionForm" (ngSubmit)="deleteAccount()">
+        <label>
+          Mot de passe actuel (confirmation)
+          <input
+            type="password"
+            formControlName="confirmPassword"
+            autocomplete="current-password"
+            aria-describedby="deletion-password-error"
+          />
+        </label>
+        @if (deletionControlInvalid('confirmPassword')) {
+          <p class="field-error" id="deletion-password-error" role="alert">
+            Le mot de passe est requis pour confirmer la suppression.
+          </p>
+        }
+
+        <button type="submit" class="danger-button" [disabled]="deleting()">
+          {{ deleting() ? 'Suppression...' : 'Supprimer définitivement mon compte' }}
+        </button>
+      </form>
+    </section>
+
+    <section class="panel" aria-labelledby="vacations-title">
+      <div class="panel-head">
+        <h2 id="vacations-title">Vacances utilisateur</h2>
+        <p class="info">{{ vacationPeriods().length }} période(s) enregistrée(s)</p>
+      </div>
+
+      @if (vacationErrorMessage()) {
+        <p class="error">{{ vacationErrorMessage() }}</p>
+      }
+
+      <form [formGroup]="vacationForm" (ngSubmit)="saveVacation()">
+        <label>
+          Libellé
+          <input type="text" formControlName="label" aria-describedby="vacation-label-error" />
+        </label>
+        @if (vacationControlInvalid('label')) {
+          <p class="field-error" id="vacation-label-error" role="alert">
+            Le libellé est requis et limité à 100 caractères.
+          </p>
+        }
+
+        <div class="grid">
+          <label>
+            Début
+            <input type="date" formControlName="startDate" />
+          </label>
+          <label>
+            Fin
+            <input type="date" formControlName="endDate" />
+          </label>
+        </div>
+
+        <div class="actions-row">
+          <button type="submit" [disabled]="vacationSubmitting()">
+            {{
+              vacationSubmitting()
+                ? 'Enregistrement...'
+                : editingVacationId()
+                  ? 'Mettre à jour la période'
+                  : 'Ajouter une période'
+            }}
+          </button>
+          @if (editingVacationId()) {
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="cancelVacationEdit()"
+            >
+              Annuler
+            </button>
+          }
+        </div>
+      </form>
+
+      @if (vacationPeriods().length) {
+        <div class="vacation-list">
+          @for (vacation of vacationPeriods(); track vacation.id) {
+            <article class="vacation-card">
+              <div>
+                <p class="vacation-label">{{ vacation.label }}</p>
+                <p class="vacation-dates">{{ vacation.startDate }} -> {{ vacation.endDate }}</p>
+              </div>
+              <div class="card-actions">
+                <button type="button" class="secondary-button" (click)="editVacation(vacation)">Modifier</button>
+                <button type="button" class="danger-button" (click)="deleteVacation(vacation)" [disabled]="vacationSubmitting()">
+                  Supprimer
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="info">Aucune période de vacances n'est encore définie.</p>
+      }
+    </section>
+  }
+  <nav class="legal-nav" aria-label="Liens légaux">
+    <a routerLink="/legal">Mentions légales et confidentialité</a>
+  </nav>
+</main>

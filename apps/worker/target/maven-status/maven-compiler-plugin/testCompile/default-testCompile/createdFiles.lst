@@ -1,0 +1,5 @@
+com\ia\worker\notification\ContextualNotificationServiceTest.class
+com\ia\worker\holiday\HolidayGovernmentClientTest.class
+com\ia\worker\occurrence\OccurrenceMaterializationServiceTest.class
+com\ia\worker\occurrence\DayClassificationServiceTest.class
+com\ia\worker\notification\NotificationSchedulingServiceTest.class

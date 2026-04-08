@@ -1,0 +1,105 @@
+databaseChangeLog:
+  - changeSet:
+      id: 013-create-task-overrides
+      author: gino
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: task_overrides
+      changes:
+        - createTable:
+            tableName: task_overrides
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: task_definition_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: task_rule_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: occurrence_date
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: override_action
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(100)
+              - column:
+                  name: icon
+                  type: varchar(50)
+              - column:
+                  name: description
+                  type: text
+              - column:
+                  name: time_mode
+                  type: varchar(20)
+              - column:
+                  name: fixed_time
+                  type: time
+              - column:
+                  name: wake_up_offset_minutes
+                  type: int
+              - column:
+                  name: override_status
+                  type: varchar(20)
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: task_overrides
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_task_overrides_user_id
+        - addForeignKeyConstraint:
+            baseTableName: task_overrides
+            baseColumnNames: task_definition_id
+            referencedTableName: task_definitions
+            referencedColumnNames: id
+            constraintName: fk_task_overrides_task_definition_id
+        - addForeignKeyConstraint:
+            baseTableName: task_overrides
+            baseColumnNames: task_rule_id
+            referencedTableName: task_rules
+            referencedColumnNames: id
+            constraintName: fk_task_overrides_task_rule_id
+        - addUniqueConstraint:
+            tableName: task_overrides
+            columnNames: task_rule_id, occurrence_date
+            constraintName: uq_task_overrides_rule_date
+        - createIndex:
+            tableName: task_overrides
+            indexName: idx_task_overrides_user_date
+            columns:
+              - column:
+                  name: user_id
+              - column:
+                  name: occurrence_date

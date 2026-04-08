@@ -1,0 +1,66 @@
+databaseChangeLog:
+  - changeSet:
+      id: 020-occurrence-status-events
+      author: ia
+      changes:
+        - createTable:
+            tableName: occurrence_status_events
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: occurrence_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: previous_status
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: new_status
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: occurred_at
+                  type: timestamptz
+                  defaultValueComputed: now()
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: occurrence_status_events
+            baseColumnNames: occurrence_id
+            referencedTableName: task_occurrences
+            referencedColumnNames: id
+            constraintName: fk_status_event_occurrence
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: occurrence_status_events
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_status_event_user
+            onDelete: CASCADE
+        - createIndex:
+            indexName: idx_status_events_occurrence
+            tableName: occurrence_status_events
+            columns:
+              - column:
+                  name: occurrence_id
+        - createIndex:
+            indexName: idx_status_events_user
+            tableName: occurrence_status_events
+            columns:
+              - column:
+                  name: user_id

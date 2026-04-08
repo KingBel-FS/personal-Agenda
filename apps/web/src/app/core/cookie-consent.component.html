@@ -1,0 +1,31 @@
+@if (!consentService.hasDecided()) {
+  <div class="consent-banner" role="dialog" aria-labelledby="consent-title" aria-describedby="consent-desc">
+    <div class="consent-inner">
+      <div class="consent-text">
+        <p id="consent-title" class="consent-title">Gestion des cookies</p>
+        <p id="consent-desc" class="consent-desc">
+          Cette application utilise des cookies essentiels pour votre session (toujours actifs).
+          En acceptant, vous autorisez également les cookies d'analyse (Matomo) qui nous aident
+          à améliorer l'application. Aucune donnée n'est partagée avec des tiers.
+          <a routerLink="/legal">En savoir plus</a>
+        </p>
+      </div>
+      <div class="consent-actions">
+        <button
+          type="button"
+          class="btn-refuse"
+          (click)="consentService.refuse()"
+        >
+          Refuser les analytics
+        </button>
+        <button
+          type="button"
+          class="btn-accept"
+          (click)="consentService.accept()"
+        >
+          Tout accepter
+        </button>
+      </div>
+    </div>
+  </div>
+}
