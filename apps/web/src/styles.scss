@@ -981,14 +981,18 @@ button:not(.icon-btn):not(.nav-link):not(.nav-tab):not(.scope-option-label):not(
 .fl-rule-item__head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); flex-wrap: wrap; }
 .fl-rule-item__info { display: flex; flex-direction: column; gap: 2px; strong { font-size: .9375rem; color: var(--ink); } }
 .fl-rule-item__meta { font-size: .8125rem; color: var(--ink-3); }
-.fl-rule-item__actions { display: flex; gap: var(--sp-2); flex-shrink: 0; }
-.fl-rule-action {
-  display: grid; place-items: center; width: 2rem; height: 2rem;
-  background: var(--bg-alt); border: 1px solid var(--border);
-  border-radius: var(--r-sm); cursor: pointer; color: var(--ink-3);
-  &:hover { color: var(--ink); border-color: var(--border-2); }
+.fl-rule-item__actions { display: flex; gap: var(--sp-2); flex-shrink: 0; align-items: center; }
+.fl-rule-action-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .25rem;
+  min-width: 2.2rem; height: 2rem; padding: 0 .5rem;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--r-sm); cursor: pointer;
+  color: var(--ink); font-size: .7rem; font-weight: 800;
+  svg { flex-shrink: 0; }
+  &:hover { background: var(--bg-alt); border-color: var(--ink-3); }
 }
-.fl-rule-action--danger:hover { color: var(--danger); border-color: var(--danger); background: var(--danger-bg); }
+.fl-rule-action-btn--off { background: var(--bg-alt); color: var(--ink-4); border-style: dashed; }
+.fl-rule-action-btn--danger { color: var(--ink-3); &:hover { color: #dc2626; border-color: #dc2626; background: #fef2f2; } }
 .fl-rule-item__badge {
   display: inline-flex; align-items: center;
   padding: .15rem .55rem; border-radius: var(--r-full);
