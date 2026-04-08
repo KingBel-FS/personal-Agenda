@@ -2,6 +2,7 @@ package com.ia.api.task.repository;
 
 import com.ia.api.task.domain.TaskOccurrenceEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -20,6 +21,10 @@ public interface TaskOccurrenceRepository extends JpaRepository<TaskOccurrenceEn
             UUID userId, String status, LocalDate from, LocalDate to);
 
     List<TaskOccurrenceEntity> findAllByTaskRuleIdAndOccurrenceDateGreaterThanEqual(UUID taskRuleId, LocalDate from);
+
+    @Modifying
+    @Query("DELETE FROM TaskOccurrenceEntity o WHERE o.taskRuleId = :ruleId AND o.occurrenceDate >= :from")
+    void deleteByTaskRuleIdAndOccurrenceDateGreaterThanEqual(@Param("ruleId") UUID ruleId, @Param("from") LocalDate from);
 
     List<TaskOccurrenceEntity> findAllByTaskRuleIdAndOccurrenceDate(UUID taskRuleId, LocalDate occurrenceDate);
 

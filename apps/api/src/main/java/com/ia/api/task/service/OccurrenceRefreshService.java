@@ -56,9 +56,7 @@ public class OccurrenceRefreshService {
         LocalDate effectiveFrom = fromDate.isBefore(today) ? today : fromDate;
         LocalDate horizon = today.plusDays(horizonDays);
 
-        List<TaskOccurrenceEntity> stale = taskOccurrenceRepository
-                .findAllByTaskRuleIdAndOccurrenceDateGreaterThanEqual(rule.getId(), effectiveFrom);
-        taskOccurrenceRepository.deleteAll(stale);
+        taskOccurrenceRepository.deleteByTaskRuleIdAndOccurrenceDateGreaterThanEqual(rule.getId(), effectiveFrom);
         taskOccurrenceRepository.flush();
 
         Map<DayCategory, LocalTime> wakeUpTimes = dayProfileRepository.findAllByUserId(userId).stream()
