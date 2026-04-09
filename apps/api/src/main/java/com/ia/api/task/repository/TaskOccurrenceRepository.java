@@ -22,7 +22,7 @@ public interface TaskOccurrenceRepository extends JpaRepository<TaskOccurrenceEn
 
     List<TaskOccurrenceEntity> findAllByTaskRuleIdAndOccurrenceDateGreaterThanEqual(UUID taskRuleId, LocalDate from);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM TaskOccurrenceEntity o WHERE o.taskRuleId = :ruleId AND o.occurrenceDate >= :from")
     void deleteByTaskRuleIdAndOccurrenceDateGreaterThanEqual(@Param("ruleId") UUID ruleId, @Param("from") LocalDate from);
 

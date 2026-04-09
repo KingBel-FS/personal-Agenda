@@ -55,3 +55,5 @@ databaseChangeLog:
       file: db/changelog/changes/031-focuslock.yaml
   - include:
       file: db/changelog/changes/032-rule-end-time.yaml
+  - include:
+      file: db/changelog/changes/033-fix-occurrence-unique-constraint.yaml

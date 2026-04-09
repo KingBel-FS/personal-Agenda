@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: 033-relax-occurrence-unique-constraint
+      author: gino
+      comment: "Relax unique constraint — wake-up override can cause multiple occurrences with same (rule, date, time) when recalculating offsets."
+      changes:
+        - sql:
+            sql: >
+              DROP INDEX IF EXISTS uq_occurrence_rule_date_time;
+
+              CREATE UNIQUE INDEX IF NOT EXISTS uq_occurrence_rule_date_slot
+                ON task_occurrences (task_rule_id, occurrence_date, COALESCE(task_time_slot_id, id));
