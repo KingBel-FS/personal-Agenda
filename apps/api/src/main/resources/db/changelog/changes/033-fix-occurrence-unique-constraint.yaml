@@ -1,12 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: 033-relax-occurrence-unique-constraint
+      id: 033-drop-occurrence-unique-constraint-v2
       author: gino
-      comment: "Relax unique constraint — wake-up override can cause multiple occurrences with same (rule, date, time) when recalculating offsets."
+      comment: "Drop strict unique constraint — wake-up override recalculation can legitimately produce same (rule, date, time) for different slots."
       changes:
         - sql:
             sql: >
               DROP INDEX IF EXISTS uq_occurrence_rule_date_time;
-
-              CREATE UNIQUE INDEX IF NOT EXISTS uq_occurrence_rule_date_slot
-                ON task_occurrences (task_rule_id, occurrence_date, COALESCE(task_time_slot_id, id));
+              DROP INDEX IF EXISTS uq_occurrence_rule_date_slot;
