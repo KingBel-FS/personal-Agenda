@@ -68,8 +68,8 @@ services:
   web:
     build:
       context: ./apps/web
-    ports:
-      - "80:80"
+    expose:
+      - "80"
     depends_on:
       - api
     restart: unless-stopped

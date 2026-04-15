@@ -6,10 +6,11 @@
   background: rgba(146, 34, 53, 0.24) !important;
   color: #fff;
   padding: 0.8rem;
-  text-align: left;
+  text-align: center;
   display: grid;
   gap: 0.65rem;
   align-content: space-between;
+  justify-items: center;
   transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   cursor: pointer;
   box-shadow: none;
@@ -74,12 +75,15 @@
   font-size: 1.05rem;
   font-weight: 800;
   line-height: 1;
+  width: 100%;
+  text-align: center;
 }
 
 .day-indicator__meta {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
+  width: 100%;
 }
 
 .day-indicator__count {

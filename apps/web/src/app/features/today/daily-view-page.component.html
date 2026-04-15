@@ -41,7 +41,7 @@
 @if (!loading() && errorMessage()) {
   <div class="daily-page">
     <div class="date-nav">
-      <button type="button" class="nav-arrow" style="background:#374151;border:2px solid #9ca3af;border-radius:8px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:1.4rem;font-weight:900" (click)="prevDay()" aria-label="Jour precedent">&lt;</button>
+      <button type="button" (click)="prevDay()" aria-label="Jour precedent" style="width:42px;height:42px;border-radius:50%;border:none;background:#74b9ff;color:#fff;font-size:1.1rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(116,185,255,.35);flex-shrink:0">&#9664;</button>
       <input
         type="date"
         class="date-input"
@@ -49,7 +49,7 @@
         (ngModelChange)="onDateChange($event)"
         aria-label="Choisir une date"
       />
-      <button type="button" class="nav-arrow" style="background:#374151;border:2px solid #9ca3af;border-radius:8px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:1.4rem;font-weight:900" (click)="nextDay()" aria-label="Jour suivant">&gt;</button>
+      <button type="button" (click)="nextDay()" aria-label="Jour suivant" style="width:42px;height:42px;border-radius:50%;border:none;background:#74b9ff;color:#fff;font-size:1.1rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(116,185,255,.35);flex-shrink:0">&#9654;</button>
     </div>
     <div class="state-error" role="alert">
       <p>{{ errorMessage() }}</p>
@@ -60,7 +60,7 @@
 @if (!loading() && !errorMessage() && data()) {
   <div class="daily-page">
     <div class="date-nav">
-      <button type="button" class="nav-arrow" style="background:#374151;border:2px solid #9ca3af;border-radius:8px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:1.4rem;font-weight:900" (click)="prevDay()" aria-label="Jour precedent">&lt;</button>
+      <button type="button" (click)="prevDay()" aria-label="Jour precedent" style="width:42px;height:42px;border-radius:50%;border:none;background:#74b9ff;color:#fff;font-size:1.1rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(116,185,255,.35);flex-shrink:0">&#9664;</button>
       <div class="date-nav__center">
         <span class="date-nav__label">{{ formatDate(data()!.date) }}</span>
         <input
@@ -71,7 +71,7 @@
           aria-label="Choisir une date"
         />
       </div>
-      <button type="button" class="nav-arrow" style="background:#374151;border:2px solid #9ca3af;border-radius:8px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:1.4rem;font-weight:900" (click)="nextDay()" aria-label="Jour suivant">&gt;</button>
+      <button type="button" (click)="nextDay()" aria-label="Jour suivant" style="width:42px;height:42px;border-radius:50%;border:none;background:#74b9ff;color:#fff;font-size:1.1rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(116,185,255,.35);flex-shrink:0">&#9654;</button>
     </div>
 
     @if (!isToday()) {

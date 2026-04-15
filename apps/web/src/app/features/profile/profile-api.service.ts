@@ -92,6 +92,6 @@ export class ProfileApiService {
   }
 
   logout() {
-    return this.http.post<{ data: { message: string } }>('/api/v1/auth/logout', {});
+    return this.http.post<{ data: { message: string } }>('/api/v1/auth/logout', {}, { withCredentials: true });
   }
 }

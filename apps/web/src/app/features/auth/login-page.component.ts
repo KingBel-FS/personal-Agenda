@@ -45,7 +45,7 @@ export class LoginPageComponent {
       .post<{ data: { accessToken: string; expiresInSeconds: number } }>(
         LoginPageComponent.loginUrl,
         this.form.getRawValue(),
-        { headers: LoginPageComponent.jsonHeaders }
+        { headers: LoginPageComponent.jsonHeaders, withCredentials: true }
       )
       .subscribe({
         next: async ({ data }) => {

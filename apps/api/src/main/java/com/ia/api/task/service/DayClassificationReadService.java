@@ -52,6 +52,18 @@ public class DayClassificationReadService {
     }
 
     private String classify(LocalDate date, UUID userId, String geographicZone) {
+        // Vacances prioritaires — un weekend/férié pendant les vacances = VACATION
+        Integer vacationCount = jdbcTemplate.queryForObject(
+                "select count(*) from vacation_periods where user_id = ? and start_date <= ? and end_date >= ?",
+                Integer.class,
+                userId,
+                date,
+                date
+        );
+        if (vacationCount != null && vacationCount > 0) {
+            return "VACATION";
+        }
+
         DayOfWeek dayOfWeek = date.getDayOfWeek();
         if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
             return "WEEKEND_HOLIDAY";
@@ -65,17 +77,6 @@ public class DayClassificationReadService {
         );
         if (holidayCount != null && holidayCount > 0) {
             return "WEEKEND_HOLIDAY";
-        }
-
-        Integer vacationCount = jdbcTemplate.queryForObject(
-                "select count(*) from vacation_periods where user_id = ? and start_date <= ? and end_date >= ?",
-                Integer.class,
-                userId,
-                date,
-                date
-        );
-        if (vacationCount != null && vacationCount > 0) {
-            return "VACATION";
         }
 
         return "WORKDAY";

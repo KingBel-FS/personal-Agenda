@@ -110,6 +110,7 @@
         <span>Notifications</span>
       </a>
     </li>
+    <!-- FocusLock: disabled while native app is being built
     <li class="nav-section-label" aria-hidden="true">FocusLock</li>
     <li>
       <a routerLink="/focuslock" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-link">
@@ -151,6 +152,7 @@
         <span>État iPhone</span>
       </a>
     </li>
+    -->
     <li>
       <a routerLink="/profile" routerLinkActive="active" class="nav-link">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
@@ -203,6 +205,7 @@
 
 <main id="main-content" class="shell-content" tabindex="-1">
   <app-notification-banner />
+  <app-offline-banner />
 
   <section class="mobile-topbar" aria-label="Barre de navigation mobile">
     <div class="mobile-topbar__brand">
@@ -258,11 +261,13 @@
       <a routerLink="/tasks/new" routerLinkActive="active" class="mobile-menu-link mobile-menu-link--primary" (click)="closeMobileMenu()">Nouvelle tâche</a>
       <a routerLink="/tasks/manage" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">Gérer les tâches</a>
       <a routerLink="/notifications" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">Notifications</a>
+      <!-- FocusLock: disabled while native app is being built
       <p class="mobile-menu-section-label">FocusLock</p>
       <a routerLink="/focuslock" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="mobile-menu-link" (click)="closeMobileMenu()">Dashboard</a>
       <a routerLink="/focuslock/rules" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">Règles</a>
       <a routerLink="/focuslock/insights" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">Insights</a>
       <a routerLink="/focuslock/device" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">État iPhone</a>
+      -->
       <a routerLink="/profile" routerLinkActive="active" class="mobile-menu-link" (click)="closeMobileMenu()">Mon profil</a>
     </div>
 

@@ -2,11 +2,13 @@ package com.ia.api.wakeup.service;
 
 import com.ia.api.auth.domain.UserEntity;
 import com.ia.api.auth.repository.UserRepository;
+import com.ia.api.notification.service.NotificationJobService;
 import com.ia.api.sync.service.RealtimeSyncService;
 import com.ia.api.task.domain.TaskOccurrenceEntity;
 import com.ia.api.task.domain.TaskRuleEntity;
 import com.ia.api.task.repository.TaskOccurrenceRepository;
 import com.ia.api.task.repository.TaskRuleRepository;
+import com.ia.api.task.repository.TaskTimeSlotRepository;
 import com.ia.api.user.domain.DayCategory;
 import com.ia.api.user.domain.DayProfileEntity;
 import com.ia.api.user.repository.DayProfileRepository;
@@ -41,7 +43,9 @@ class WakeUpOverrideServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private TaskOccurrenceRepository taskOccurrenceRepository;
     @Mock private TaskRuleRepository taskRuleRepository;
+    @Mock private TaskTimeSlotRepository taskTimeSlotRepository;
     @Mock private DayProfileRepository dayProfileRepository;
+    @Mock private NotificationJobService notificationJobService;
     @Mock private RealtimeSyncService realtimeSyncService;
 
     @Captor private ArgumentCaptor<List<TaskOccurrenceEntity>> saveAllCaptor;
@@ -60,7 +64,9 @@ class WakeUpOverrideServiceTest {
                 userRepository,
                 taskOccurrenceRepository,
                 taskRuleRepository,
+                taskTimeSlotRepository,
                 dayProfileRepository,
+                notificationJobService,
                 realtimeSyncService
         );
 
@@ -93,6 +99,7 @@ class WakeUpOverrideServiceTest {
         verify(taskOccurrenceRepository).saveAll(saveAllCaptor.capture());
         assertThat(saveAllCaptor.getValue()).hasSize(1);
         assertThat(saveAllCaptor.getValue().get(0).getOccurrenceTime()).isEqualTo(LocalTime.of(7, 0)); // 6:30 + 30
+        verify(notificationJobService).cancelPendingJobsForOccurrence(occ.getId());
         verify(realtimeSyncService).publish(email, "TODAY");
     }
 
@@ -145,6 +152,7 @@ class WakeUpOverrideServiceTest {
         verify(wakeUpOverrideRepository).deleteByUserIdAndOverrideDate(userId, tomorrow);
         verify(taskOccurrenceRepository).saveAll(saveAllCaptor.capture());
         assertThat(saveAllCaptor.getValue().get(0).getOccurrenceTime()).isEqualTo(LocalTime.of(7, 45)); // 7:30 + 15
+        verify(notificationJobService).cancelPendingJobsForOccurrence(occ.getId());
         verify(realtimeSyncService).publish(email, "TODAY");
     }
 

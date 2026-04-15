@@ -7,14 +7,16 @@ import { TodayApiService } from '../features/today/today-api.service';
 import { AuthService } from './auth.service';
 import { BadgeService } from './badge.service';
 import { MatomoService } from './matomo.service';
+import { NetworkStatusService } from './network-status.service';
 import { NotificationBannerComponent } from './notification-banner.component';
+import { OfflineBannerComponent } from './offline-banner.component';
 import { RealtimeSyncService } from './realtime-sync.service';
 import { StreakService } from './streak.service';
 import { StreakFlameComponent } from '../shared/components/streak-flame.component';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationBannerComponent, StreakFlameComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NotificationBannerComponent, OfflineBannerComponent, StreakFlameComponent],
   templateUrl: './app-shell.component.html',
   styleUrl: './app-shell.component.scss'
 })
@@ -25,6 +27,7 @@ export class AppShellComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   private readonly todayApi = inject(TodayApiService);
+  private readonly networkStatusService = inject(NetworkStatusService);
   private readonly realtimeSyncService = inject(RealtimeSyncService);
   private readonly streakService = inject(StreakService);
   private readonly _matomo = inject(MatomoService);
@@ -67,6 +70,7 @@ export class AppShellComponent implements OnInit {
     this.themeMediaQuery.addEventListener('change', this.onThemePreferenceChange);
 
     document.body.classList.add('has-shell');
+    this.networkStatusService.start();
     this.realtimeSyncService.start();
     this.refreshStreak();
     this.router.events
@@ -112,7 +116,7 @@ export class AppShellComponent implements OnInit {
   protected logout(): void {
     if (this.loggingOut()) return;
     this.loggingOut.set(true);
-    this.http.post('/api/v1/auth/logout', {}).subscribe({
+    this.http.post('/api/v1/auth/logout', {}, { withCredentials: true }).subscribe({
       next: () => {
         this.realtimeSyncService.stop();
         this.authService.clearAccessToken();
@@ -158,6 +162,7 @@ export class AppShellComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
+    this.networkStatusService.stop();
     this.realtimeSyncService.stop();
     this.themeMediaQuery?.removeEventListener('change', this.onThemePreferenceChange);
     if (this.celebrationTimer) {

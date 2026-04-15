@@ -21,7 +21,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
-@Service
+// @Service  // FocusLock: disabled while native app is being built
 public class FocuslockRuleService {
 
     private final FlRuleRepository ruleRepository;

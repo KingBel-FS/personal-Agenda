@@ -28,11 +28,12 @@ export const routes: Routes = [
       { path: 'profile', loadComponent: () => import('./features/profile/profile-page.component').then((m) => m.ProfilePageComponent) },
       { path: 'tasks/new', loadComponent: () => import('./features/tasks/task-create-page.component').then((m) => m.TaskCreatePageComponent) },
       { path: 'tasks/manage', loadComponent: () => import('./features/tasks/task-manage-page.component').then((m) => m.TaskManagePageComponent) },
-      { path: 'notifications', loadComponent: () => import('./features/notifications/notification-center-page.component').then((m) => m.NotificationCenterPageComponent) },
-      { path: 'focuslock', loadComponent: () => import('./features/focuslock/focuslock-dashboard-page.component').then((m) => m.FocuslockDashboardPageComponent) },
-      { path: 'focuslock/rules', loadComponent: () => import('./features/focuslock/focuslock-rules-page.component').then((m) => m.FocuslockRulesPageComponent) },
-      { path: 'focuslock/insights', loadComponent: () => import('./features/focuslock/focuslock-insights-page.component').then((m) => m.FocuslockInsightsPageComponent) },
-      { path: 'focuslock/device', loadComponent: () => import('./features/focuslock/focuslock-device-page.component').then((m) => m.FocuslockDevicePageComponent) }
+      { path: 'notifications', loadComponent: () => import('./features/notifications/notification-center-page.component').then((m) => m.NotificationCenterPageComponent) }
+      // FocusLock: disabled while native app is being built
+      // { path: 'focuslock', loadComponent: () => import('./features/focuslock/focuslock-dashboard-page.component').then((m) => m.FocuslockDashboardPageComponent) },
+      // { path: 'focuslock/rules', loadComponent: () => import('./features/focuslock/focuslock-rules-page.component').then((m) => m.FocuslockRulesPageComponent) },
+      // { path: 'focuslock/insights', loadComponent: () => import('./features/focuslock/focuslock-insights-page.component').then((m) => m.FocuslockInsightsPageComponent) },
+      // { path: 'focuslock/device', loadComponent: () => import('./features/focuslock/focuslock-device-page.component').then((m) => m.FocuslockDevicePageComponent) }
     ]
   }
 ];

@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Service
+// @Service  // FocusLock: disabled while native app is being built
 public class FocuslockDashboardService {
 
     private final FlDeviceRepository deviceRepository;

@@ -2,11 +2,13 @@ package com.ia.api.wakeup.service;
 
 import com.ia.api.auth.domain.UserEntity;
 import com.ia.api.auth.repository.UserRepository;
+import com.ia.api.notification.service.NotificationJobService;
 import com.ia.api.sync.service.RealtimeSyncService;
 import com.ia.api.task.domain.TaskOccurrenceEntity;
 import com.ia.api.task.domain.TaskRuleEntity;
 import com.ia.api.task.repository.TaskOccurrenceRepository;
 import com.ia.api.task.repository.TaskRuleRepository;
+import com.ia.api.task.repository.TaskTimeSlotRepository;
 import com.ia.api.user.domain.DayCategory;
 import com.ia.api.user.domain.DayProfileEntity;
 import com.ia.api.user.repository.DayProfileRepository;
@@ -34,7 +36,9 @@ public class WakeUpOverrideService {
     private final UserRepository userRepository;
     private final TaskOccurrenceRepository taskOccurrenceRepository;
     private final TaskRuleRepository taskRuleRepository;
+    private final TaskTimeSlotRepository taskTimeSlotRepository;
     private final DayProfileRepository dayProfileRepository;
+    private final NotificationJobService notificationJobService;
     private final RealtimeSyncService realtimeSyncService;
 
     public WakeUpOverrideService(
@@ -42,14 +46,18 @@ public class WakeUpOverrideService {
             UserRepository userRepository,
             TaskOccurrenceRepository taskOccurrenceRepository,
             TaskRuleRepository taskRuleRepository,
+            TaskTimeSlotRepository taskTimeSlotRepository,
             DayProfileRepository dayProfileRepository,
+            NotificationJobService notificationJobService,
             RealtimeSyncService realtimeSyncService
     ) {
         this.wakeUpOverrideRepository = wakeUpOverrideRepository;
         this.userRepository = userRepository;
         this.taskOccurrenceRepository = taskOccurrenceRepository;
         this.taskRuleRepository = taskRuleRepository;
+        this.taskTimeSlotRepository = taskTimeSlotRepository;
         this.dayProfileRepository = dayProfileRepository;
+        this.notificationJobService = notificationJobService;
         this.realtimeSyncService = realtimeSyncService;
     }
 
@@ -77,7 +85,8 @@ public class WakeUpOverrideService {
         entity.setWakeUpTime(wakeUpTime);
         wakeUpOverrideRepository.save(entity);
 
-        recalculateOccurrences(user.getId(), date, wakeUpTime);
+        List<UUID> affectedIds = recalculateOccurrences(user.getId(), date, wakeUpTime);
+        affectedIds.forEach(notificationJobService::cancelPendingJobsForOccurrence);
         try { realtimeSyncService.publish(email, "TODAY"); } catch (Exception ignored) {}
 
         return new WakeUpOverrideResponse(date.toString(), wakeUpTime.toString());
@@ -109,23 +118,62 @@ public class WakeUpOverrideService {
             toSave.add(occ);
         }
         taskOccurrenceRepository.saveAll(toSave);
+        toSave.forEach(occ -> notificationJobService.cancelPendingJobsForOccurrence(occ.getId()));
         try { realtimeSyncService.publish(email, "TODAY"); } catch (Exception ignored) {}
     }
 
-    private void recalculateOccurrences(UUID userId, LocalDate date, LocalTime wakeUpTime) {
+    private List<UUID> recalculateOccurrences(UUID userId, LocalDate date, LocalTime wakeUpTime) {
         List<TaskOccurrenceEntity> occurrences = taskOccurrenceRepository
                 .findAllByUserIdAndOccurrenceDateAndStatusNot(userId, date, "canceled");
 
+        // Group by ruleId to handle multi-slot tasks
+        Map<UUID, List<TaskOccurrenceEntity>> byRule = occurrences.stream()
+                .collect(java.util.stream.Collectors.groupingBy(TaskOccurrenceEntity::getTaskRuleId));
+
         List<TaskOccurrenceEntity> toSave = new ArrayList<>();
-        for (TaskOccurrenceEntity occ : occurrences) {
-            TaskRuleEntity rule = taskRuleRepository.findById(occ.getTaskRuleId()).orElse(null);
+        for (var entry : byRule.entrySet()) {
+            TaskRuleEntity rule = taskRuleRepository.findById(entry.getKey()).orElse(null);
             if (rule == null || !"WAKE_UP_OFFSET".equals(rule.getTimeMode())) continue;
-            int offset = rule.getWakeUpOffsetMinutes() != null ? rule.getWakeUpOffsetMinutes() : 0;
-            occ.setOccurrenceTime(wakeUpTime.plusMinutes(offset));
-            occ.setUpdatedAt(Instant.now());
-            toSave.add(occ);
+
+            int baseOffset = rule.getWakeUpOffsetMinutes() != null ? rule.getWakeUpOffsetMinutes() : 0;
+            LocalTime baseTime = wakeUpTime.plusMinutes(baseOffset);
+
+            // Sort occurrences by current time to preserve order
+            List<TaskOccurrenceEntity> ruleOccs = entry.getValue().stream()
+                    .sorted(java.util.Comparator.comparing(TaskOccurrenceEntity::getOccurrenceTime))
+                    .toList();
+
+            // First occurrence = base time from rule offset
+            LocalTime previousTime = baseTime;
+            for (int i = 0; i < ruleOccs.size(); i++) {
+                TaskOccurrenceEntity occ = ruleOccs.get(i);
+                if (i == 0) {
+                    occ.setOccurrenceTime(baseTime);
+                } else {
+                    // Multi-slot: keep the same interval from the previous occurrence
+                    // by looking at the slot's afterPreviousMinutes or keeping fixed slots unchanged
+                    UUID slotId = occ.getTaskTimeSlotId();
+                    if (slotId != null) {
+                        var slot = taskTimeSlotRepository.findById(slotId).orElse(null);
+                        if (slot != null && "EVERY_N_MINUTES".equals(slot.getTimeMode())) {
+                            int interval = slot.getAfterPreviousMinutes() != null ? slot.getAfterPreviousMinutes() : 60;
+                            occ.setOccurrenceTime(previousTime.plusMinutes(interval));
+                        } else if (slot != null && "FIXED".equals(slot.getTimeMode()) && slot.getFixedTime() != null) {
+                            occ.setOccurrenceTime(slot.getFixedTime());
+                        } else {
+                            occ.setOccurrenceTime(baseTime);
+                        }
+                    } else {
+                        occ.setOccurrenceTime(baseTime);
+                    }
+                }
+                previousTime = occ.getOccurrenceTime();
+                occ.setUpdatedAt(Instant.now());
+                toSave.add(occ);
+            }
         }
         taskOccurrenceRepository.saveAll(toSave);
+        return toSave.stream().map(TaskOccurrenceEntity::getId).toList();
     }
 
     private void validateDateAllowed(LocalDate date, String timezoneName) {

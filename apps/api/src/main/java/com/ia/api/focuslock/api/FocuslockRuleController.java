@@ -17,8 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
-@RestController
-@RequestMapping("/api/v1/focuslock/rules")
+// FocusLock: disabled while native app is being built
+// @RestController
+// @RequestMapping("/api/v1/focuslock/rules")
 public class FocuslockRuleController {
 
     private final FocuslockRuleService ruleService;

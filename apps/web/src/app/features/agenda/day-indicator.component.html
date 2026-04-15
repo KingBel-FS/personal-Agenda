@@ -11,8 +11,8 @@
   (click)="onActivate()"
   (keydown)="onNavigate($event)"
 >
-  <span class="day-indicator__date">{{ day().date.slice(8, 10) }}</span>
-  <span class="day-indicator__meta">
+  <span class="day-indicator__date" style="display:block;width:100%;text-align:center">{{ day().date.slice(8, 10) }}</span>
+  <span class="day-indicator__meta" style="display:flex;width:100%;justify-content:center">
     <span class="day-indicator__count">{{ day().totalCount }}</span>
   </span>
 </button>

@@ -58,8 +58,6 @@ public class NotificationSchedulingService {
         int created = 0;
         for (OccurrenceRow occ : occurrences) {
             ZonedDateTime occDateTime = ZonedDateTime.of(occ.occurrenceDate(), occ.occurrenceTime(), PARIS);
-            created += createJobIfAbsent(occ, BEFORE_15, occDateTime.minusMinutes(15).toInstant());
-            created += createJobIfAbsent(occ, BEFORE_2,  occDateTime.minusMinutes(2).toInstant());
             created += createJobIfAbsent(occ, ON_TIME,   occDateTime.toInstant());
             created += createJobIfAbsent(occ, AFTER_60,  occDateTime.plusMinutes(60).toInstant());
         }

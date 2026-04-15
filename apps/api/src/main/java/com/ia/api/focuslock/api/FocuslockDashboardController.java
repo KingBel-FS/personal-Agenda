@@ -10,8 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-@RequestMapping("/api/v1/focuslock")
+// FocusLock: disabled while native app is being built
+// @RestController
+// @RequestMapping("/api/v1/focuslock")
 public class FocuslockDashboardController {
 
     private final FocuslockDashboardService dashboardService;

@@ -15,7 +15,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
-@Service
+// @Service  // FocusLock: disabled while native app is being built
 public class FocuslockDeviceService {
 
     private final FlDeviceRepository deviceRepository;
